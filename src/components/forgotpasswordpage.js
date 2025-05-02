@@ -96,7 +96,7 @@ function ForgotPasswordPage() {
             </Box>
 
             {/* Forgot Password Form */}
-            <Card sx={{ padding: 4, width: '300px', borderRadius: 4 }} elevation={5}>
+            <Card sx={{ padding: 4, width: '350px', borderRadius: 4 }} elevation={5}>
                 {message && (
                     <Typography variant="body2" color={message.startsWith("Error") ? "error" : "success"} gutterBottom textAlign="center">
                         {message}

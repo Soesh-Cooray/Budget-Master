@@ -94,7 +94,7 @@ function SignUpPage() {
             </Box>
 
             {/* Sign-up Form (Combined Card) */}
-            <Card sx={{ padding: 4, width: '300px', borderRadius: 4 }} elevation={5}>
+            <Card sx={{ padding: 4, width: '350px', borderRadius: 4 }} elevation={5}>
                 {successMessage && (
                     <Typography variant="body2" color="success" gutterBottom textAlign="center">
                         {successMessage}

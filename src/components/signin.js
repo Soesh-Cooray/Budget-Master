@@ -58,7 +58,7 @@ return (
 
       {/* Sign-in Form */}
      
-      <Card sx={{ padding: 4, width: '300px',borderRadius: 4 }} elevation={5}>
+      <Card sx={{ padding: 4, width: '350px',borderRadius: 4 }} elevation={5}>
       {errorMessage && (
           <Typography variant="body2" color="error" gutterBottom textAlign="center">
             {errorMessage}
