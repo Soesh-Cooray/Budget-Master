@@ -21,11 +21,15 @@ function App() {
               component="main"
               sx={{
                   flexGrow: 1,
-                  p: 3,
+                  paddingLeft: 1,   // Adjust as needed
+                  paddingRight: 1,  // Adjust as needed
+                  paddingTop: 0,
+                  paddingBottom: 1,
                   width: showSidebar ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
+                  
               }}
           >
-              <Toolbar />
+              <div style={{ height: 5 }} />  {/* Replace Toolbar with div */}
               <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/signin" element={<SignInPage />} />

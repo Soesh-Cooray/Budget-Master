@@ -54,7 +54,7 @@ function HomePage() {
             <Button component={Link} to="/signin" sx={{ marginTop: 2 }}>Login</Button>
           </Grid>
           <Grid item xs={12} md={8}>
-            <Card sx={{ padding: 2,borderRadius: 4, width: '80%', height: '160px', marginLeft: 20, marginTop: 15 }}elevation={10}>
+            <Card sx={{ padding: 2,borderRadius: 4, width: '80%', height: '200px', marginLeft: 20, marginTop: 15 }}elevation={10}>
               <Typography variant="h4" gutterBottom>
                 Your Budget Overview
               </Typography>
@@ -80,7 +80,7 @@ function HomePage() {
         </Typography>
         <Grid container spacing={4} justifyContent="center">
           <Grid item xs={12} md={3}>
-            <Card sx={{ padding: 3, textAlign: 'left' ,borderRadius: 4, width: '320px' }}elevation={10}>
+            <Card sx={{ padding: 3, textAlign: 'left' ,borderRadius: 4, width: '320px', height:'200px' }}elevation={10}>
              <InsertChart />
               <Typography variant="h5" sx={{ marginTop: 3 }} gutterBottom>
                 Expense Tracking
@@ -93,7 +93,7 @@ function HomePage() {
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ padding: 3, textAlign: 'left',borderRadius: 4,width: '320px' }}elevation={10}>
+            <Card sx={{ padding: 3, textAlign: 'left',borderRadius: 4,width: '320px',height:'200px' }}elevation={10}>
             <CalendarToday />
               <Typography variant="h5" sx={{ marginTop: 3 }} gutterBottom>
                 Budget Planning
@@ -104,7 +104,7 @@ function HomePage() {
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ padding: 3, textAlign: 'left' ,borderRadius: 4,width: '320px' }}elevation={10}>
+            <Card sx={{ padding: 3, textAlign: 'left' ,borderRadius: 4,width: '320px',height:'200px' }}elevation={10}>
             <MonetizationOn />
               <Typography variant="h5" sx={{ marginTop: 3 }} gutterBottom>
                 Financial Reports
