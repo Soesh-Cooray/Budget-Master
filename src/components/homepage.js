@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 
 function HomePage() {
   return (
-    <Box sx={{ backgroundColor: '#f0f7ff' }}>
+    <Box sx={{ backgroundColor: '#f0f7ff', overflow: 'auto', minHeight: '100vh', width: '100%' }}>
       {/* Header */}
       <AppBar position="static" sx={{ backgroundColor: 'white', color: 'black', padding: 2 }}>
         <Grid container alignItems="center" justifyContent="space-between">
@@ -24,11 +24,10 @@ function HomePage() {
           </Grid>
           <Grid item>
             <Box>
-            <Button component={Link} to="/signin" sx={{ marginRight: 1 }}>Login</Button>
+              <Button component={Link} to="/signin" sx={{ marginRight: 1 }}>Login</Button>
               <Button variant="contained" sx={{ backgroundColor: 'blue', color: 'white' }} component={Link} to="/signup">
                 Sign Up
               </Button>
-             
             </Box>
           </Grid>
         </Grid>
@@ -38,7 +37,7 @@ function HomePage() {
       <Box sx={{ padding: 4 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
-            <Typography variant="h2" sx={{ marginBottom: 5 , marginTop: 10,}}>
+            <Typography variant="h2" sx={{ marginBottom: 5, marginTop: 10 }}>
               Take Control Of Your Finances
             </Typography>
             <Typography variant="h4">
@@ -48,21 +47,21 @@ function HomePage() {
               Financial goals with BudgetMaster.
             </Typography>
             
-            <Button variant="contained" sx={{ marginRight: 1 , marginTop: 2,}}component={Link} to="/signup">
+            <Button variant="contained" sx={{ marginRight: 1, marginTop: 2 }} component={Link} to="/signup">
               Get Started →
             </Button>
             <Button component={Link} to="/signin" sx={{ marginTop: 2 }}>Login</Button>
           </Grid>
           <Grid item xs={12} md={8}>
-            <Card sx={{ padding: 2,borderRadius: 4, width: '80%', height: '200px', marginLeft: 20, marginTop: 15 }}elevation={10}>
+            <Card sx={{ padding: 2, borderRadius: 4, width: '80%', height: '200px', marginLeft: 20, marginTop: 15 }} elevation={10}>
               <Typography variant="h4" gutterBottom>
                 Your Budget Overview
               </Typography>
-              <LinearProgress variant="determinate" value={50} sx={{ marginBottom: 1, borderRadius: 4, backgroundColor: 'lightgray', '& .MuiLinearProgress-bar': { backgroundColor: 'blue',borderRadius: 4,  }, height: 16 }} />
-              <LinearProgress variant="determinate" value={25} sx={{ marginBottom: 1, borderRadius: 4, backgroundColor: 'lightgray', '& .MuiLinearProgress-bar': { backgroundColor: 'red', borderRadius: 4, }, height: 16 }} />
-              <LinearProgress variant="determinate" value={75} sx={{ marginBottom: 1, borderRadius: 4, backgroundColor: 'lightgray', '& .MuiLinearProgress-bar': { backgroundColor: 'green', borderRadius: 4, }, height: 16 }} />
-              <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}> {/* Adjusted Box layout */}
-                <Box display="flex" alignItems="center"> {/* Group icon and "Savings Goal" */}
+              <LinearProgress variant="determinate" value={50} sx={{ marginBottom: 1, borderRadius: 4, backgroundColor: 'lightgray', '& .MuiLinearProgress-bar': { backgroundColor: 'blue', borderRadius: 4 }, height: 16 }} />
+              <LinearProgress variant="determinate" value={25} sx={{ marginBottom: 1, borderRadius: 4, backgroundColor: 'lightgray', '& .MuiLinearProgress-bar': { backgroundColor: 'red', borderRadius: 4 }, height: 16 }} />
+              <LinearProgress variant="determinate" value={75} sx={{ marginBottom: 1, borderRadius: 4, backgroundColor: 'lightgray', '& .MuiLinearProgress-bar': { backgroundColor: 'green', borderRadius: 4 }, height: 16 }} />
+              <Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
+                <Box display="flex" alignItems="center">
                   <SavingsIcon />
                   <Typography variant="body2" sx={{ marginLeft: 1 }}>Savings Goal</Typography>
                 </Box>
@@ -74,14 +73,14 @@ function HomePage() {
       </Box>
 
       {/* Why Choose BudgetMaster Section */}
-      <Box textAlign="center" padding={4}>
-      <Typography variant="h4" sx={{ marginTop: 5, marginBottom: 7,fontWeight: 'bold' }}>
+      <Box textAlign="center" padding={4} sx={{ overflow: 'visible' }}>
+        <Typography variant="h4" sx={{ marginTop: 5, marginBottom: 7, fontWeight: 'bold' }}>
           Why Choose BudgetMaster
         </Typography>
         <Grid container spacing={4} justifyContent="center">
           <Grid item xs={12} md={3}>
-            <Card sx={{ padding: 3, textAlign: 'left' ,borderRadius: 4, width: '320px', height:'200px' }}elevation={10}>
-             <InsertChart />
+            <Card sx={{ padding: 3, textAlign: 'left', borderRadius: 4, width: '320px', height: '200px' }} elevation={10}>
+              <InsertChart />
               <Typography variant="h5" sx={{ marginTop: 3 }} gutterBottom>
                 Expense Tracking
               </Typography>
@@ -89,23 +88,22 @@ function HomePage() {
                 Easily track and categorize your expenses 
                 to see where your money goes.
               </Typography>
-
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ padding: 3, textAlign: 'left',borderRadius: 4,width: '320px',height:'200px' }}elevation={10}>
-            <CalendarToday />
+            <Card sx={{ padding: 3, textAlign: 'left', borderRadius: 4, width: '320px', height: '200px' }} elevation={10}>
+              <CalendarToday />
               <Typography variant="h5" sx={{ marginTop: 3 }} gutterBottom>
                 Budget Planning
               </Typography>
               <Typography variant="body1">
-                Set monthly budgets to see how  much more you can spend.
+                Set monthly budgets to see how much more you can spend.
               </Typography>
             </Card>
           </Grid>
           <Grid item xs={12} md={3}>
-            <Card sx={{ padding: 3, textAlign: 'left' ,borderRadius: 4,width: '320px',height:'200px' }}elevation={10}>
-            <MonetizationOn />
+            <Card sx={{ padding: 3, textAlign: 'left', borderRadius: 4, width: '320px', height: '200px' }} elevation={10}>
+              <MonetizationOn />
               <Typography variant="h5" sx={{ marginTop: 3 }} gutterBottom>
                 Financial Reports
               </Typography>

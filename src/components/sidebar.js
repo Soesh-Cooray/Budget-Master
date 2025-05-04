@@ -1,5 +1,8 @@
 import React from 'react';
-import {Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar,Typography, IconButton} from '@mui/material';
+import {
+    Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar,
+    Typography, IconButton, Box
+} from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SavingsIcon from '@mui/icons-material/Savings';
@@ -9,7 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DRAWER_WIDTH } from '../constants';
 
-const COLLAPSED_WIDTH = 60;
+const COLLAPSED_WIDTH = 69;
 
 function Sidebar({ open, onClose }) {
     const navigate = useNavigate();
@@ -33,12 +36,15 @@ function Sidebar({ open, onClose }) {
             anchor="left"
             sx={{
                 width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
-                flexShrink: 1,
+                flexShrink: 0,
+                position: 'fixed',
                 '& .MuiDrawer-paper': {
                     width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
                     boxSizing: 'border-box',
                     overflowX: 'hidden',
-                    paddingRight: open ? '8px' : 0,
+                    paddingRight: 0,
+                    borderRight: 0,
+                    position: 'fixed',
                     transition: (theme) =>
                         theme.transitions.create('width', {
                             easing: theme.transitions.easing.sharp,
@@ -52,7 +58,7 @@ function Sidebar({ open, onClose }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: open ? 'space-between' : 'center',
-                    px: 20,
+                    px: open ? 2 : 1,
                 }}
             >
                 {open && (
@@ -67,8 +73,8 @@ function Sidebar({ open, onClose }) {
                 <IconButton
                     onClick={onClose}
                     sx={{
-                        borderRadius: '8px',  
-                        ml: 'auto',  
+                        borderRadius: '8px',
+                        ml: open ? 'auto' : 0,
                         transition: 'background-color 0.3s ease',
                         '&:hover': {
                             backgroundColor: '#4caf50',
@@ -85,18 +91,19 @@ function Sidebar({ open, onClose }) {
 
             <List
                 sx={{
+                    width: '100%',
                     '& .MuiListItem-root': {
                         borderRadius: '8px',
-                        ml: 1,
-                        mr: 0,
-                        my: 0,
+                        mx: 1,
+                        width: 'calc(100% - 16px)',
+                        my: 0.5,
                         transition: 'background-color 0.3s ease',
                     },
-                    '& .MuiListItem-root:hover': {
+                    '& .MuiListItem-root:not(.logout-item):hover': {
                         backgroundColor: '#4caf50',
                         color: '#fff',
                     },
-                    '& .MuiListItem-root:hover .MuiListItemIcon-root': {
+                    '& .MuiListItem-root:not(.logout-item):hover .MuiListItemIcon-root': {
                         color: '#fff',
                     },
                 }}
@@ -109,7 +116,9 @@ function Sidebar({ open, onClose }) {
                         backgroundColor: isActive('/') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
                     }}
                 >
-                    <ListItemIcon><DashboardIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
+                        <DashboardIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Dashboard" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
 
@@ -118,10 +127,16 @@ function Sidebar({ open, onClose }) {
                     key="Transactions"
                     onClick={() => handleNavigation('/transaction')}
                     sx={{
-                        backgroundColor: isActive('/transaction') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                        backgroundColor: isActive('/transaction') ? '#4caf50' : 'transparent',
+                        color: isActive('/transaction') ? '#fff' : 'inherit',
+                        '& .MuiListItemIcon-root': {
+                            color: isActive('/transaction') ? '#fff' : 'inherit',
+                        }
                     }}
                 >
-                    <ListItemIcon><AttachMoneyIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
+                        <AttachMoneyIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Transactions" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
 
@@ -133,7 +148,9 @@ function Sidebar({ open, onClose }) {
                         backgroundColor: isActive('/budgets') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
                     }}
                 >
-                    <ListItemIcon><SavingsIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
+                        <SavingsIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Budgets" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
 
@@ -145,7 +162,9 @@ function Sidebar({ open, onClose }) {
                         backgroundColor: isActive('/reports') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
                     }}
                 >
-                    <ListItemIcon><BarChartIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
+                        <BarChartIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Reports" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
 
@@ -153,8 +172,20 @@ function Sidebar({ open, onClose }) {
                     button
                     key="Logout"
                     onClick={handleLogout}
+                    className="logout-item"
+                    sx={{
+                        '&:hover': {
+                            backgroundColor: '#f44336', // red
+                            color: '#fff',
+                        },
+                        '&:hover .MuiListItemIcon-root': {
+                            color: '#fff',
+                        },
+                    }}
                 >
-                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                    <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
+                        <ExitToAppIcon />
+                    </ListItemIcon>
                     <ListItemText primary="Logout" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
             </List>
