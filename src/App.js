@@ -27,20 +27,7 @@ function App() {
             {showSidebar && (
                 <>
                     <Sidebar open={open} onClose={handleDrawerToggle} />
-                    <IconButton
-                        onClick={handleDrawerToggle}
-                        sx={{
-                            position: 'fixed',
-                            top: 10,
-                            left: open ? DRAWER_WIDTH + 10 : COLLAPSED_WIDTH + 10,
-                            zIndex: (theme) => theme.zIndex.drawer + 2,
-                            backgroundColor: '#fff',
-                            border: '1px solid #ccc',
-                            '&:hover': { backgroundColor: '#f0f0f0' }
-                        }}
-                    >
-                        <MenuIcon />
-                    </IconButton>
+                    
                 </>
             )}
 

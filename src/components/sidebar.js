@@ -1,15 +1,15 @@
-// sidebar.js
 import React from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material';
+import {Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar,Typography, IconButton} from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import SavingsIcon from '@mui/icons-material/Savings';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DRAWER_WIDTH } from '../constants';
 
-const COLLAPSED_WIDTH = 56;
+const COLLAPSED_WIDTH = 60;
 
 function Sidebar({ open, onClose }) {
     const navigate = useNavigate();
@@ -33,7 +33,7 @@ function Sidebar({ open, onClose }) {
             anchor="left"
             sx={{
                 width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
-                flexShrink: 0,
+                flexShrink: 1,
                 '& .MuiDrawer-paper': {
                     width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
                     boxSizing: 'border-box',
@@ -46,69 +46,112 @@ function Sidebar({ open, onClose }) {
                 },
             }}
         >
-            <Toolbar>
-                <Typography
-                    variant="h6"
-                    noWrap
+            <Toolbar
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: open ? 'space-between' : 'center',
+                    px: 1,
+                }}
+            >
+                {open && (
+                    <Typography
+                        variant="h6"
+                        noWrap
+                        sx={{ whiteSpace: 'nowrap', overflow: 'hidden' }}
+                    >
+                        BudgetMaster
+                    </Typography>
+                )}
+                <IconButton
+                    onClick={onClose}
                     sx={{
-                        opacity: open ? 1 : 0,
-                        transition: 'opacity 0.3s ease-in-out',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
+                        borderRadius: '8px',    
+                        transition: 'background-color 0.3s ease',
+                        '&:hover': {
+                            backgroundColor: '#4caf50',
+                            color: '#fff',
+                        },
+                        '&:hover svg': {
+                            color: '#fff',
+                        },
                     }}
                 >
-                    BudgetMaster
-                </Typography>
+                    <MenuIcon />
+                </IconButton>
             </Toolbar>
-            <List>
+
+            <List
+                sx={{
+                    '& .MuiListItem-root': {
+                        borderRadius: '8px',
+                        mx: 1,
+                        my: 1,
+                        transition: 'background-color 0.3s ease',
+                    },
+                    '& .MuiListItem-root:hover': {
+                        backgroundColor: '#4caf50',
+                        color: '#fff',
+                    },
+                    '& .MuiListItem-root:hover .MuiListItemIcon-root': {
+                        color: '#fff',
+                    },
+                }}
+            >
                 <ListItem
                     button
                     key="Dashboard"
                     onClick={() => handleNavigation('/')}
-                    sx={{ backgroundColor: isActive('/') ? 'rgba(0, 0, 0, 0.08)' : 'transparent' }}
+                    sx={{
+                        backgroundColor: isActive('/') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                    }}
                 >
-                    <ListItemIcon>
-                        <DashboardIcon />
-                    </ListItemIcon>
+                    <ListItemIcon><DashboardIcon /></ListItemIcon>
                     <ListItemText primary="Dashboard" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
+
                 <ListItem
                     button
                     key="Transactions"
                     onClick={() => handleNavigation('/transaction')}
-                    sx={{ backgroundColor: isActive('/transaction') ? 'rgba(0, 0, 0, 0.08)' : 'transparent' }}
+                    sx={{
+                        backgroundColor: isActive('/transaction') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                    }}
                 >
-                    <ListItemIcon>
-                        <AttachMoneyIcon />
-                    </ListItemIcon>
+                    <ListItemIcon><AttachMoneyIcon /></ListItemIcon>
                     <ListItemText primary="Transactions" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
+
                 <ListItem
                     button
                     key="Budgets"
                     onClick={() => handleNavigation('/budgets')}
-                    sx={{ backgroundColor: isActive('/budgets') ? 'rgba(0, 0, 0, 0.08)' : 'transparent' }}
+                    sx={{
+                        backgroundColor: isActive('/budgets') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                    }}
                 >
-                    <ListItemIcon>
-                        <SavingsIcon />
-                    </ListItemIcon>
+                    <ListItemIcon><SavingsIcon /></ListItemIcon>
                     <ListItemText primary="Budgets" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
+
                 <ListItem
                     button
                     key="Reports"
                     onClick={() => handleNavigation('/reports')}
-                    sx={{ backgroundColor: isActive('/reports') ? 'rgba(0, 0, 0, 0.08)' : 'transparent' }}
+                    sx={{
+                        backgroundColor: isActive('/reports') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                    }}
                 >
-                    <ListItemIcon>
-                        <BarChartIcon />
-                    </ListItemIcon>
+                    <ListItemIcon><BarChartIcon /></ListItemIcon>
                     <ListItemText primary="Reports" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
-                <ListItem button key="Logout" onClick={handleLogout}>
-                    <ListItemIcon>
-                        <ExitToAppIcon />
-                    </ListItemIcon>
+
+                <ListItem
+                    button
+                    key="Logout"
+                    onClick={handleLogout}
+                >
+                    <ListItemIcon><ExitToAppIcon /></ListItemIcon>
                     <ListItemText primary="Logout" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
             </List>
