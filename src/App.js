@@ -1,45 +1,73 @@
-import React from 'react';
-import { Box, CssBaseline, Toolbar } from '@mui/material';
+// App.js
+import React, { useState } from 'react';
+import { Box, CssBaseline, IconButton, Toolbar } from '@mui/material';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import MenuIcon from '@mui/icons-material/Menu';
 import HomePage from './components/homepage';
 import SignInPage from './components/signin';
 import SignUpPage from './components/signup';
 import TransactionsPage from './components/transaction';
 import ForgotPasswordPage from './components/forgotpasswordpage';
 import Sidebar from './components/sidebar';
-import { DRAWER_WIDTH } from './constants';
+import { DRAWER_WIDTH, COLLAPSED_WIDTH } from './constants';
 
 function App() {
-  const location = useLocation();
-  const showSidebar = ['/transaction', '/budgets', '/reports'].includes(location.pathname);
+    const location = useLocation();
+    const showSidebar = ['/transaction', '/budgets', '/reports', '/'].includes(location.pathname);
+    const [open, setOpen] = useState(true);
 
-  return (
-      <Box sx={{ display: 'flex' }}>
-          <CssBaseline />
-          {showSidebar && <Sidebar />}
-          <Box
-              component="main"
-              sx={{
-                  flexGrow: 1,
-                  paddingLeft: 1,   // Adjust as needed
-                  paddingRight: 1,  // Adjust as needed
-                  paddingTop: 0,
-                  paddingBottom: 1,
-                  width: showSidebar ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
-                  
-              }}
-          >
-              <div style={{ height: 5 }} />  {/* Replace Toolbar with div */}
-              <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/signin" element={<SignInPage />} />
-                  <Route path="/signup" element={<SignUpPage />} />
-                  <Route path="/transaction" element={<TransactionsPage />} />
-                  <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-              </Routes>
-          </Box>
-      </Box>
-  );
+    const handleDrawerToggle = () => {
+        setOpen((prev) => !prev);
+    };
+
+    return (
+        <Box sx={{ display: 'flex' }}>
+            <CssBaseline />
+
+            {showSidebar && (
+                <>
+                    <Sidebar open={open} onClose={handleDrawerToggle} />
+                    <IconButton
+                        onClick={handleDrawerToggle}
+                        sx={{
+                            position: 'fixed',
+                            top: 10,
+                            left: open ? DRAWER_WIDTH + 10 : COLLAPSED_WIDTH + 10,
+                            zIndex: (theme) => theme.zIndex.drawer + 2,
+                            backgroundColor: '#fff',
+                            border: '1px solid #ccc',
+                            '&:hover': { backgroundColor: '#f0f0f0' }
+                        }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                </>
+            )}
+
+            <Box
+                component="main"
+                sx={{
+                    flexGrow: 1,
+                    width: showSidebar ? `calc(100% - ${open ? DRAWER_WIDTH : COLLAPSED_WIDTH}px)` : '100%',
+                    marginLeft: showSidebar ? (open ? DRAWER_WIDTH : COLLAPSED_WIDTH) : 0,
+                    transition: (theme) => theme.transitions.create(['width', 'margin'], {
+                        easing: theme.transitions.easing.sharp,
+                        duration: theme.transitions.duration.standard,
+                    }),
+                    p: 3,
+                }}
+            >
+                <Toolbar />
+                <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/signin" element={<SignInPage />} />
+                    <Route path="/signup" element={<SignUpPage />} />
+                    <Route path="/transaction" element={<TransactionsPage />} />
+                    <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+                </Routes>
+            </Box>
+        </Box>
+    );
 }
 
 export default App;
