@@ -84,7 +84,7 @@ function SignUpPage() {
         >
             {/* Logo and Title */}
             <Box textAlign="center" mb={4}>
-                <Box display="flex" alignItems="center" justifyContent="center">
+                <Box display="flex" alignItems="center" justifyContent="center" sx={{ marginTop: 2 }}>
                     <AttachMoneyIcon sx={{ color: 'blue', fontSize: 30, marginRight: 1 }} />
                     <Typography variant="h5" fontWeight="bold">
                         BudgetMaster
@@ -94,7 +94,7 @@ function SignUpPage() {
             </Box>
 
             {/* Sign-up Form (Combined Card) */}
-            <Card sx={{ padding: 4, width: '350px', borderRadius: 4 }} elevation={5}>
+            <Card sx={{ padding: 4, width: '350px', borderRadius: 4, marginBottom:5 }} elevation={5}>
                 {successMessage && (
                     <Typography variant="body2" color="success" gutterBottom textAlign="center">
                         {successMessage}
