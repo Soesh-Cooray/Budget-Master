@@ -38,6 +38,7 @@ function Sidebar({ open, onClose }) {
                     width: open ? DRAWER_WIDTH : COLLAPSED_WIDTH,
                     boxSizing: 'border-box',
                     overflowX: 'hidden',
+                    paddingRight: open ? '8px' : 0,
                     transition: (theme) =>
                         theme.transitions.create('width', {
                             easing: theme.transitions.easing.sharp,
@@ -51,7 +52,7 @@ function Sidebar({ open, onClose }) {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: open ? 'space-between' : 'center',
-                    px: 1,
+                    px: 20,
                 }}
             >
                 {open && (
@@ -66,7 +67,8 @@ function Sidebar({ open, onClose }) {
                 <IconButton
                     onClick={onClose}
                     sx={{
-                        borderRadius: '8px',    
+                        borderRadius: '8px',  
+                        ml: 'auto',  
                         transition: 'background-color 0.3s ease',
                         '&:hover': {
                             backgroundColor: '#4caf50',
@@ -85,8 +87,9 @@ function Sidebar({ open, onClose }) {
                 sx={{
                     '& .MuiListItem-root': {
                         borderRadius: '8px',
-                        mx: 1,
-                        my: 1,
+                        ml: 1,
+                        mr: 0,
+                        my: 0,
                         transition: 'background-color 0.3s ease',
                     },
                     '& .MuiListItem-root:hover': {

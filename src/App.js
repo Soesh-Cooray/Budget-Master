@@ -41,7 +41,7 @@ function App() {
                         easing: theme.transitions.easing.sharp,
                         duration: theme.transitions.duration.standard,
                     }),
-                    p: 3,
+                    padding: (theme) => theme.spacing(3),
                 }}
             >
                 <Toolbar />
