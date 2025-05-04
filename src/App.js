@@ -7,6 +7,7 @@ import SignInPage from './components/signin';
 import SignUpPage from './components/signup';
 import TransactionsPage from './components/transaction';
 import ForgotPasswordPage from './components/forgotpasswordpage';
+import BudgetsPage from './components/budgets';
 import Sidebar from './components/sidebar';
 import { DRAWER_WIDTH, COLLAPSED_WIDTH } from './constants';
 
@@ -90,6 +91,8 @@ function App() {
                     <Route path="/signup" element={<SignUpPage />} />
                     <Route path="/transaction" element={<TransactionsPage />} />
                     <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+                    <Route path="/budgets" element={<BudgetsPage />} />
+                    
                 </Routes>
             </Box>
         </Box>

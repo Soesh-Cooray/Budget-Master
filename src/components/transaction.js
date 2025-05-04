@@ -8,10 +8,6 @@ import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { MenuItem, styled } from '@mui/material';
 import axios from 'axios';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SavingsIcon from '@mui/icons-material/Savings';
-import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
-import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 
 const theme = createTheme({
@@ -179,24 +175,7 @@ function TransactionsPage() {
             </Typography>
             <Typography variant="body1">Manage your income and expenses</Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button variant="contained" sx={{ borderRadius: 2,color: '#000000',backgroundColor: '#ffffff', '&:hover': {backgroundColor: '#D4E7EB'},}}>
-              <DashboardIcon/>
-              Dashboard
-            </Button>
-            <Button variant="contained" sx={{ borderRadius: 2,color: '#000000',backgroundColor: '#ffffff', '&:hover': {backgroundColor: '#D4E7EB'},}}>
-              <SavingsIcon/>
-              Budgets
-            </Button>
-            <Button variant="contained" sx={{ borderRadius: 2,color: '#000000',backgroundColor: '#ffffff', '&:hover': {backgroundColor: '#D4E7EB'},}}>
-              <SignalCellularAltIcon/>
-              Reports
-            </Button>
-            <Button variant="contained" sx={{ borderRadius: 2, backgroundColor: '#FF0740', '&:hover': {backgroundColor: '#ef4444'},}} onClick={handleLogout}>
-              <LogoutIcon/>
-              Logout
-            </Button>
-          </Box>
+          
         </Box>
 
         {/* Filters */}
