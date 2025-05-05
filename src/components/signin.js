@@ -72,7 +72,7 @@ return (
         </Typography>
         <TextField label="Enter Your Email" fullWidth margin="normal" value={username} onChange={(e) => setUsername(e.target.value)}/>
         <TextField label="Enter Your Password" type="password" fullWidth margin="normal"  value={password} onChange={(e) => setPassword(e.target.value)} />
-        <Button component={Link} to="/transaction" variant="contained" fullWidth sx={{ marginTop: 2 ,borderRadius: 4}}onClick={handleSignIn}>
+        <Button component={Link} to="/dashboard" variant="contained" fullWidth sx={{ marginTop: 2 ,borderRadius: 4}}onClick={handleSignIn}>
           Sign In
         </Button>
         <Typography variant="body2" align="center" mt={2}>

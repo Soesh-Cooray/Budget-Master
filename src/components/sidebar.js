@@ -111,7 +111,7 @@ function Sidebar({ open, onClose }) {
                 <ListItem
                     button
                     key="Dashboard"
-                    onClick={() => handleNavigation('/')}
+                    onClick={() => handleNavigation('/dashboard')}
                     sx={{
                         backgroundColor: isActive('/dashboard') ? 'rgba(128, 128, 128, 0.68)' : 'transparent',
                     }}

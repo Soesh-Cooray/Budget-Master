@@ -1,19 +1,21 @@
-// Updated App.js with fixed sidebar and main content layout
 import React, { useState, useEffect } from 'react';
 import { Box, CssBaseline } from '@mui/material';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation,Navigate     } from 'react-router-dom';
 import HomePage from './components/homepage';
 import SignInPage from './components/signin';
 import SignUpPage from './components/signup';
 import TransactionsPage from './components/transaction';
 import ForgotPasswordPage from './components/forgotpasswordpage';
 import BudgetsPage from './components/budgets';
+import Dashboard from './components/dashboard';
 import Sidebar from './components/sidebar';
+import DebugDashboard from './components/DebugDashboard';
+
 import { DRAWER_WIDTH, COLLAPSED_WIDTH } from './constants';
 
 function App() {
     const location = useLocation();
-    const showSidebar = ['/transaction', '/budgets', '/reports'].includes(location.pathname);
+    const showSidebar = ['/transaction', '/budgets', '/reports','/dashboard'].includes(location.pathname);
     const [open, setOpen] = useState(true);
 
     const handleDrawerToggle = () => {
@@ -47,6 +49,10 @@ function App() {
             document.head.removeChild(style);
         };
     }, []);
+
+    useEffect(() => {
+        console.log("Current location:", location.pathname);
+    }, [location]);
 
     return (
         <Box sx={{ 
@@ -92,6 +98,10 @@ function App() {
                     <Route path="/transaction" element={<TransactionsPage />} />
                     <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
                     <Route path="/budgets" element={<BudgetsPage />} />
+                    <Route path="/reports" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<DebugDashboard />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                     
                 </Routes>
             </Box>
