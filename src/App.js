@@ -9,7 +9,6 @@ import ForgotPasswordPage from './components/forgotpasswordpage';
 import BudgetsPage from './components/budgets';
 import Dashboard from './components/dashboard';
 import Sidebar from './components/sidebar';
-import DebugDashboard from './components/DebugDashboard';
 
 import { DRAWER_WIDTH, COLLAPSED_WIDTH } from './constants';
 
@@ -100,7 +99,6 @@ function App() {
                     <Route path="/budgets" element={<BudgetsPage />} />
                     <Route path="/reports" element={<Dashboard />} />
                     <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/dashboard" element={<DebugDashboard />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                     
                 </Routes>
