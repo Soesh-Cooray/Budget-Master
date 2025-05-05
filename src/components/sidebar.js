@@ -113,7 +113,7 @@ function Sidebar({ open, onClose }) {
                     key="Dashboard"
                     onClick={() => handleNavigation('/')}
                     sx={{
-                        backgroundColor: isActive('/') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                        backgroundColor: isActive('/dashboard') ? 'rgba(128, 128, 128, 0.68)' : 'transparent',
                     }}
                 >
                     <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
@@ -127,11 +127,7 @@ function Sidebar({ open, onClose }) {
                     key="Transactions"
                     onClick={() => handleNavigation('/transaction')}
                     sx={{
-                        backgroundColor: isActive('/transaction') ? '#4caf50' : 'transparent',
-                        color: isActive('/transaction') ? '#fff' : 'inherit',
-                        '& .MuiListItemIcon-root': {
-                            color: isActive('/transaction') ? '#fff' : 'inherit',
-                        }
+                        backgroundColor: isActive('/transaction') ? 'rgba(128, 128, 128, 0.68)' : 'transparent',
                     }}
                 >
                     <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
@@ -145,7 +141,7 @@ function Sidebar({ open, onClose }) {
                     key="Budgets"
                     onClick={() => handleNavigation('/budgets')}
                     sx={{
-                        backgroundColor: isActive('/budgets') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                        backgroundColor: isActive('/budgets') ? 'rgba(128, 128, 128, 0.68)' : 'transparent',
                     }}
                 >
                     <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>
@@ -159,7 +155,7 @@ function Sidebar({ open, onClose }) {
                     key="Reports"
                     onClick={() => handleNavigation('/reports')}
                     sx={{
-                        backgroundColor: isActive('/reports') ? 'rgba(0, 0, 0, 0.08)' : 'transparent',
+                        backgroundColor: isActive('/reports') ? 'rgba(128, 128, 128, 0.68)' : 'transparent',
                     }}
                 >
                     <ListItemIcon sx={{ minWidth: 0, mr: 3, justifyContent: open ? 'flex-start' : 'center' }}>

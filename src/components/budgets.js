@@ -17,25 +17,17 @@ import {
     Button,
     FormControl,
     InputLabel,
+    Paper,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
+import SavingsIcon from '@mui/icons-material/Savings'; // Import the SavingsIcon
 
 function BudgetsPage() {
     // Replace with your actual budget data array, fetched from an API or state
-    const [budgets, setBudgets] = useState([
-        {
-            id: 1,
-            category: 'Utilities',
-            budgetType: 'Monthly Budget',
-            startDate: '2025-05-04', // YYYY-MM-DD format for input type="date"
-            allocated: 1000,
-            spent: 0,
-        },
-        // Add more budget objects here
-    ]);
+    const [budgets, setBudgets] = useState([]); // Initialize as empty array
 
     const [isAddBudgetDialogOpen, setIsAddBudgetDialogOpen] = useState(false);
 
@@ -72,7 +64,7 @@ function BudgetsPage() {
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                         Budgets
                     </Typography>
-                    <Typography variant="subtitle1" gutterBottom>
+                    <Typography variant="subtitle1" >
                         Set and track your spending limits
                     </Typography>
                 </Box>
@@ -81,13 +73,12 @@ function BudgetsPage() {
                 </Button>
             </Box>
 
-
-            <Grid container spacing={2}>
+            <Grid container spacing={2} justifyContent="center" alignItems="center"> {/* Center the content */}
                 {budgets.map((budget) => (
                     <Grid item xs={12} sm={6} md={4} key={budget.id}>
                         <Card>
                             <CardContent>
-                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1} borderRadius={2} >
+                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                                     <Typography variant="h6">{budget.category}</Typography>
                                     <Box>
                                         <IconButton aria-label="edit" onClick={() => handleEditBudget(budget.id, budget)}>
@@ -129,11 +120,20 @@ function BudgetsPage() {
                     </Grid>
                 ))}
                 {budgets.length === 0 && (
-                    <Grid item xs={12}>
-                        <Typography variant="h6" align="center" color="textSecondary">
-                            No budgets set up yet
-                        </Typography>
-                        {/* You can add a "Create Your First Budget" button here */}
+                    <Grid item xs={12} sx={{ textAlign: 'center', mt: 4 }}>
+                        <Paper elevation={10} sx={{ padding:5,width:1150 ,height:350, borderRadius: 2, backgroundColor: '#FFFFFF',borderColor: 'primary.main', borderStyle: 'dashed' }}>
+                            <SavingsIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+                            <Typography variant="h6" color="textSecondary" mb={1}>
+                                No budgets set up yet
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary" mb={2}>
+                                Create your first budget to start tracking your spending and
+                                stay on top of your financial goals.
+                            </Typography>
+                            <Button variant="contained" color="primary" onClick={handleAddBudgetOpen}>
+                                Create Your First Budget
+                            </Button>
+                        </Paper>
                     </Grid>
                 )}
             </Grid>
@@ -147,7 +147,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget }) {
     const [category, setCategory] = useState('');
     const [budgetAmount, setBudgetAmount] = useState(0);
     const [period, setPeriod] = useState('monthly');
-    const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA')); // YYYY-MM-DD for input type="date"
+    const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA').split('/').reverse().join('-')); //YYYY-MM-DD
 
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
