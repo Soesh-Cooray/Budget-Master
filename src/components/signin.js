@@ -20,7 +20,7 @@ function SignInPage() {
 
           localStorage.setItem('accessToken', response.data.access); // Store access token
           localStorage.setItem('refreshToken', response.data.refresh); // Store refresh token (if present)
-          navigate('/transaction');
+          navigate('/dashboard'); // Redirect to dashboard
         } catch (error) {
           if (error.response && error.response.data) {
               if (error.response.data.detail === "No active account found with the given credentials") {

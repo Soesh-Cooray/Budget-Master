@@ -3,6 +3,9 @@ import { Box, Typography, Paper, Grid, LinearProgress,List,ListItem,ListItemText
 import { styled } from '@mui/material/styles';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale,LinearScale,BarElement,ArcElement,Title,Tooltip,Legend } from 'chart.js';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import DiningIcon from '@mui/icons-material/RestaurantMenu';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
@@ -173,7 +176,7 @@ const Dashboard = () => {
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
         Good morning, {user.name}
       </Typography>
-      <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+      <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
         Here's an overview of your finances
       </Typography>
 
@@ -181,9 +184,9 @@ const Dashboard = () => {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} md={4}>
           <StatCard>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between',width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Current Balance</Typography>
-              <Box component="span" sx={{ color: '#9e9e9e' }}>📋</Box>
+              <AccountBalanceWalletIcon sx={{color: '#39C8CC'}}/>
             </Box>
             <StatValue>${user.currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</StatValue>
             <StatLabel>Total balance across all accounts</StatLabel>
@@ -191,9 +194,9 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} md={4}>
           <StatCard>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between',width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Total Income</Typography>
-              <Box component="span" sx={{ color: '#4caf50' }}>⊕</Box>
+                <ArrowCircleUpIcon  sx={{ color: '#2eb432' }}/>
             </Box>
             <StatValue sx={{ color: '#4caf50' }}>${user.totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}</StatValue>
             <StatLabel>Total income this period</StatLabel>
@@ -201,9 +204,9 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} md={4}>
           <StatCard>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between',width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Total Expenses</Typography>
-              <Box component="span" sx={{ color: '#f44336' }}>⊖</Box>
+                <ArrowCircleDownIcon sx={{ color: '#f44336' }}/>
             </Box>
             <StatValue sx={{ color: '#f44336' }}>${user.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}</StatValue>
             <StatLabel>Total expenses this period</StatLabel>
@@ -217,7 +220,7 @@ const Dashboard = () => {
           <StyledPaper>
             <Typography variant="h6" sx={{ mb: 0.5 }}>Income vs Expenses</Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>Your financial balance over time</Typography>
-            <Box sx={{ height: 300 }}>
+            <Box sx={{ height: 400, width : 400}}>
               <Bar data={barChartData} options={barChartOptions} />
             </Box>
           </StyledPaper>
@@ -226,12 +229,12 @@ const Dashboard = () => {
           <StyledPaper>
             <Typography variant="h6" sx={{ mb: 0.5 }}>Expense Breakdown</Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>Your spending by category</Typography>
-            <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', position: 'relative' }}>
+            <Box sx={{ height: 300, width:670, display: 'flex', justifyContent: 'center', position: 'relative' }}>
               <Doughnut data={doughnutChartData} options={doughnutChartOptions} />
               
               {/* Legends for the doughnut chart */}
-              <Box sx={{ position: 'absolute', bottom: 10, width: '100%', display: 'flex', justifyContent: 'center' }}>
-                <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <Box sx={{ position: 'absolute',top:350, width: '100%', display: 'flex', justifyContent: 'center',mt: 4,pb: 2 }}>
+                <Box sx={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center'}}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: '#ec407a' }} />
                     <Typography variant="caption">Dining Out 74.1%</Typography>
