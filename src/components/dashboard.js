@@ -6,8 +6,6 @@ import { Chart as ChartJS, CategoryScale,LinearScale,BarElement,ArcElement,Title
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import DiningIcon from '@mui/icons-material/RestaurantMenu';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 
 // Register the chart components
 ChartJS.register(

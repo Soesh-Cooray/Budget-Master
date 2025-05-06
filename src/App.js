@@ -8,6 +8,7 @@ import TransactionsPage from './components/transaction';
 import ForgotPasswordPage from './components/forgotpasswordpage';
 import BudgetsPage from './components/budgets';
 import Dashboard from './components/dashboard';
+import Reports from './components/reports';
 import Sidebar from './components/sidebar';
 
 import { DRAWER_WIDTH, COLLAPSED_WIDTH } from './constants';
@@ -97,7 +98,7 @@ function App() {
                     <Route path="/transaction" element={<TransactionsPage />} />
                     <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
                     <Route path="/budgets" element={<BudgetsPage />} />
-                    <Route path="/reports" element={<Dashboard />} />
+                    <Route path="/reports" element={<Reports />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                     
