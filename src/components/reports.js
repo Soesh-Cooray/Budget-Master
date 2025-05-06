@@ -405,10 +405,10 @@ const Reports = () => {
           <StyledCard>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Expense Categories
+                Expense Category
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Breakdown of your spending by category
+                Breakdown of your spending by categoriwaes
               </Typography>
               <Box height={400} display="flex" justifyContent="center">
                 <Box width="70%" height="100%">
