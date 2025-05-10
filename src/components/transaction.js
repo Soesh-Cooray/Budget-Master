@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,Typography,Button,TextField,Select,Dialog,DialogTitle,DialogContent,DialogActions,ThemeProvider,
   createTheme,Table,TableHead,TableBody,TableRow,TableCell,IconButton,FormControl,InputLabel,
@@ -6,7 +6,6 @@ import {
 
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { MenuItem, styled } from '@mui/material';
-import axios from 'axios';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useNavigate } from 'react-router-dom';
 
@@ -51,35 +50,7 @@ function TransactionsPage() {
     navigate('/signin'); // Redirect to the signin page
   };
 
-  useEffect(() => {
-      const fetchTransactionsAndCategories = async () => {
-          try {
-              const token = localStorage.getItem('accessToken');
-              console.log('Access Token being used:', token);
-              const expensesResponse = await axios.get('http://127.0.0.1:8000/budget/expenses/', {
-                  headers: { Authorization: `Bearer ${token}` },
-              });
-              setExpenses(expensesResponse.data.map(exp => ({ ...exp, amount: parseFloat(exp.amount) }))); // Parse amount to number
 
-              const incomesResponse = await axios.get('http://127.0.0.1:8000/budget/incomes/', {
-                  headers: { Authorization: `Bearer ${token}` },
-              });
-              setIncomes(incomesResponse.data.map(inc => ({ ...inc, amount: parseFloat(inc.amount) }))); // Parse amount to number
-
-
-              const categoriesResponse = await axios.get('http://127.0.0.1:8000/budget/category/', {
-                  headers: { Authorization: `Bearer ${token}` },
-              });
-              setCategories(categoriesResponse.data);
-
-          } catch (error) {
-              console.error('Error fetching data:', error);
-              // Handle error (e.g., redirect to login if token is invalid)
-          }
-      };
-
-      fetchTransactionsAndCategories();
-  }, []);
 
   const handleOpenAddDialog = () => {
       setOpenAddDialog(true);
@@ -89,81 +60,8 @@ function TransactionsPage() {
       setOpenAddDialog(false);
   };
 
-  const handleAddTransaction = async () => {
-      try {
-          const token = localStorage.getItem('accessToken');
-          const transactionData = {
-              description,
-              amount: parseFloat(amount), // Ensure amount is a number
-              date,
-              category, // Send the category ID
-          };
-
-          let response;
-          const apiUrl = type === 'expense' ? 'http://127.0.0.1:8000/budget/expenses/' : 'http://127.0.0.1:8000/budget/incomes/';
-
-          response = await axios.post(apiUrl, transactionData, {
-              headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (response && response.status === 201) {
-              // Successfully added, fetch updated transactions
-              const expensesResponse = await axios.get('http://127.0.0.1:8000/budget/expenses/', {
-                  headers: { Authorization: `Bearer ${token}` },
-              });
-              setExpenses(expensesResponse.data);
-
-              const incomesResponse = await axios.get('http://127.0.0.1:8000/budget/incomes/', {
-                  headers: { Authorization: `Bearer ${token}` },
-              });
-              setIncomes(incomesResponse.data);
-
-              // Clear form and close dialog
-              setDescription('');
-              setDate('');
-              setCategory('');
-              setType('');
-              setAmount('');
-              handleCloseAddDialog();
-          } else {
-              console.error('Failed to add transaction');
-              // Handle failure (e.g., show an error message to the user)
-          }
-      } catch (error) {
-          console.error('Error adding transaction:', error);
-          // Handle error (e.g., show an error message to the user)
-      }
-  };
-
-  useEffect(() => {
-    const fetchTransactionsAndCategories = async () => {
-        try {
-            const token = localStorage.getItem('accessToken'); // Use accessToken
-
-            const expensesResponse = await axios.get('http://127.0.0.1:8000/budget/expenses/', {
-                headers: { Authorization: `Bearer ${token}` }, // Use Bearer token
-            });
-            setExpenses(expensesResponse.data);
-
-            const incomesResponse = await axios.get('http://127.0.0.1:8000/budget/incomes/', {
-                headers: { Authorization: `Bearer ${token}` }, // Use Bearer token
-            });
-            setIncomes(incomesResponse.data);
-
-            const categoriesResponse = await axios.get('http://127.0.0.1:8000/budget/categories/', {
-                headers: { Authorization: `Bearer ${token}` }, // Use Bearer token
-            });
-            setCategories(categoriesResponse.data);
-
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            // Handle error (e.g., redirect to login if token is invalid)
-        }
-    };
-
-    fetchTransactionsAndCategories();
-}, []);
-
+  
+  
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ backgroundColor: '#f0f7ff', padding: 2 }}>
@@ -327,7 +225,7 @@ function TransactionsPage() {
             >
               Cancel
             </Button>
-            <Button variant="contained" onClick={handleAddTransaction} sx={{ borderRadius: 4, '&:hover': { backgroundColor: '#16a34a', color: '#f9fafb' } }}>
+            <Button variant="contained"  sx={{ borderRadius: 4, '&:hover': { backgroundColor: '#16a34a', color: '#f9fafb' } }}>
               Add
             </Button>
           </DialogActions>
