@@ -98,6 +98,7 @@ function Sidebar({ open, onClose }) {
                         width: 'calc(100% - 16px)',
                         my: 0.5,
                         transition: 'background-color 0.3s ease',
+                        cursor: 'pointer',
                     },
                     '& .MuiListItem-root:not(.logout-item):hover': {
                         backgroundColor: '#4caf50',
