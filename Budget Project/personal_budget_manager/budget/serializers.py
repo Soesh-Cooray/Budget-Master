@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transaction, Category
+from .models import Transaction, Category, Budget
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,3 +14,9 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ['id', 'amount', 'date', 'description', 'category', 'category_name', 'transaction_type']
         read_only_fields = ['user']
+
+class BudgetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Budget
+        fields = '__all__'
+        read_only_fields = ['user']  # <-- Add this line

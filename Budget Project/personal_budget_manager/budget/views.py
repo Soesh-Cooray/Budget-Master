@@ -2,8 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db import models
-from .models import Transaction, Category, TransactionType
-from .serializers import TransactionSerializer, CategorySerializer
+from .models import Transaction, Category, TransactionType, Budget
+from .serializers import TransactionSerializer, CategorySerializer, BudgetSerializer
 
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
@@ -51,3 +51,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
         income = self.get_queryset().filter(transaction_type=TransactionType.INCOME)
         serializer = self.get_serializer(income, many=True)
         return Response(serializer.data)
+
+class BudgetViewSet(viewsets.ModelViewSet):
+    serializer_class = BudgetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Budget.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
