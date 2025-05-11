@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Container,
     Typography,
@@ -18,18 +18,54 @@ import {
     FormControl,
     InputLabel,
     Paper,
+    CircularProgress,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
-import SavingsIcon from '@mui/icons-material/Savings'; // Import the SavingsIcon
+import SavingsIcon from '@mui/icons-material/Savings';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import { categoryAPI, budgetAPI, transactionAPI } from '../api';
 
 function BudgetsPage() {
-    // Replace with your actual budget data array, fetched from an API or state
-    const [budgets, setBudgets] = useState([]); // Initialize as empty array
-
+    const [budgets, setBudgets] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [transactions, setTransactions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isAddBudgetDialogOpen, setIsAddBudgetDialogOpen] = useState(false);
+    const [snackbar, setSnackbar] = useState({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+    const [editingBudget, setEditingBudget] = useState(null);
+
+    useEffect(() => {
+        fetchBudgetsCategoriesTransactions();
+    }, []);
+
+    const fetchBudgetsCategoriesTransactions = async () => {
+        try {
+            setLoading(true);
+            const [budgetsRes, categoriesRes, transactionsRes] = await Promise.all([
+                budgetAPI.getAll(),
+                categoryAPI.getExpenseCategories(),
+                transactionAPI.getExpenses()
+            ]);
+            setBudgets(budgetsRes.data);
+            setCategories(categoriesRes.data);
+            setTransactions(transactionsRes.data);
+            setLoading(false);
+        } catch (err) {
+            console.error('Error fetching budgets, categories, or transactions:', err);
+            setError('Failed to load budgets, categories, or transactions');
+            setLoading(false);
+        }
+    };
 
     const handleAddBudgetOpen = () => {
         setIsAddBudgetDialogOpen(true);
@@ -37,25 +73,114 @@ function BudgetsPage() {
 
     const handleAddBudgetClose = () => {
         setIsAddBudgetDialogOpen(false);
+        setEditingBudget(null);
     };
 
-    const handleAddNewBudget = (newBudget) => {
-        // Generate a unique ID (replace with your actual ID generation logic)
-        newBudget.id = budgets.length + 1;
-        setBudgets([...budgets, newBudget]);
+    const handleEditBudget = (id, budget) => {
+        setEditingBudget(budget);
+        setIsAddBudgetDialogOpen(true);
     };
 
-    const handleEditBudget = (id, updatedBudget) => {
-        // Implement your edit logic here (e.g., update state or send API request)
-        console.log(`Edit budget with ID: ${id}`, updatedBudget);
+    const handleAddNewBudget = async (newBudget) => {
+        try {
+            const categoryObj = categories.find(cat => cat.name === newBudget.category);
+            if (!categoryObj) throw new Error('Category not found');
+            const payload = {
+                category: categoryObj.id,
+                amount: newBudget.budgetAmount,
+                period: newBudget.period,
+                start_date: newBudget.startDate
+            };
+            if (editingBudget) {
+                // Update existing budget
+                const res = await budgetAPI.update(editingBudget.id, payload);
+                setBudgets(budgets.map(b => b.id === editingBudget.id ? res.data : b));
+                setSnackbar({
+                    open: true,
+                    message: 'Budget updated successfully',
+                    severity: 'success'
+                });
+            } else {
+                // Create new budget
+                const res = await budgetAPI.create(payload);
+                setBudgets([...budgets, res.data]);
+                setSnackbar({
+                    open: true,
+                    message: 'Budget added successfully',
+                    severity: 'success'
+                });
+            }
+        } catch (err) {
+            setSnackbar({
+                open: true,
+                message: editingBudget ? 'Failed to update budget' : 'Failed to add budget',
+                severity: 'error'
+            });
+        }
     };
 
-    const handleDeleteBudget = (id) => {
-        // Implement your delete logic here (e.g., update state or send API request)
-        console.log(`Delete budget with ID: ${id}`);
-        const updatedBudgets = budgets.filter(budget => budget.id !== id);
-        setBudgets(updatedBudgets);
+    const handleDeleteBudget = async (id) => {
+        try {
+            await budgetAPI.delete(id);
+            setBudgets(budgets.filter(budget => budget.id !== id));
+            setSnackbar({
+                open: true,
+                message: 'Budget deleted successfully',
+                severity: 'success'
+            });
+        } catch (err) {
+            setSnackbar({
+                open: true,
+                message: 'Failed to delete budget',
+                severity: 'error'
+            });
+        }
     };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+
+    // Helper to calculate spent for a budget
+    const calculateSpent = (budget) => {
+        const budgetStart = new Date(budget.start_date);
+        const now = new Date();
+        let periodEnd;
+        if (budget.period === 'monthly') {
+            periodEnd = new Date(budgetStart.getFullYear(), budgetStart.getMonth() + 1, budgetStart.getDate());
+        } else if (budget.period === 'weekly') {
+            periodEnd = new Date(budgetStart);
+            periodEnd.setDate(periodEnd.getDate() + 7);
+        } else {
+            // 'once' or any other value
+            periodEnd = new Date(budgetStart);
+            periodEnd.setDate(periodEnd.getDate() + 1);
+        }
+        // Only consider transactions in the period and category
+        return transactions
+            .filter(txn =>
+                txn.category === budget.category &&
+                new Date(txn.date) >= budgetStart &&
+                new Date(txn.date) < periodEnd
+            )
+            .reduce((sum, txn) => sum + parseFloat(txn.amount), 0);
+    };
+
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                <Typography color="error">{error}</Typography>
+            </Box>
+        );
+    }
 
     return (
         <Container>
@@ -64,7 +189,7 @@ function BudgetsPage() {
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                         Budgets
                     </Typography>
-                    <Typography variant="subtitle1" >
+                    <Typography variant="subtitle1">
                         Set and track your spending limits
                     </Typography>
                 </Box>
@@ -73,55 +198,31 @@ function BudgetsPage() {
                 </Button>
             </Box>
 
-            <Grid container spacing={2} justifyContent="center" alignItems="center"> {/* Center the content */}
-                {budgets.map((budget) => (
-                    <Grid item xs={12} sm={6} md={4} key={budget.id}>
-                        <Card>
-                            <CardContent>
-                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                                    <Typography variant="h6">{budget.category}</Typography>
-                                    <Box>
-                                        <IconButton aria-label="edit" onClick={() => handleEditBudget(budget.id, budget)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton aria-label="delete" onClick={() => handleDeleteBudget(budget.id)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Box>
-                                </Box>
-                                <Typography variant="body2" color="textSecondary" mb={0.5}>
-                                    {budget.budgetType}
-                                </Typography>
-                                <Typography variant="caption" color="textSecondary" mb={1}>
-                                    Started {new Date(budget.startDate).toLocaleDateString()}
-                                </Typography>
-
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={(budget.spent / budget.allocated) * 100}
-                                    sx={{ mb: 1 }}
-                                />
-
-                                <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                                    <Typography>${budget.spent.toFixed(2)}</Typography>
-                                    <Typography color="textSecondary">of ${budget.allocated.toFixed(2)}</Typography>
-                                </Box>
-
-                                <Box display="flex" justifyContent="space-between" alignItems="center">
-                                    <Typography variant="body2" color="textSecondary">
-                                        Remaining ${(budget.allocated - budget.spent).toFixed(2)}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary">
-                                        {budget.allocated === 0 ? '0%' : ((budget.spent / budget.allocated) * 100).toFixed(0)}%
-                                    </Typography>
-                                </Box>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ))}
+            <Grid container spacing={3} alignItems="flex-start">
+                {budgets.map((budget) => {
+                    const spent = calculateSpent(budget);
+                    const remaining = Number(budget.amount) - spent;
+                    const percent = Number(budget.amount) ? Math.min((spent / Number(budget.amount)) * 100, 100) : 0;
+                    const categoryName = categories.find(cat => cat.id === budget.category)?.name || 'Category';
+                    return (
+                        <Grid item xs={12} sm={6} md={4} key={budget.id}>
+                            <BudgetProgressCard
+                                name={categoryName}
+                                period={budget.period}
+                                startDate={budget.start_date}
+                                spent={spent}
+                                amount={budget.amount}
+                                remaining={remaining}
+                                percent={percent}
+                                onEdit={() => handleEditBudget(budget.id, budget)}
+                                onDelete={() => handleDeleteBudget(budget.id)}
+                            />
+                        </Grid>
+                    );
+                })}
                 {budgets.length === 0 && (
                     <Grid item xs={12} sx={{ textAlign: 'center', mt: 4 }}>
-                        <Paper elevation={10} sx={{ padding:5,width:1150 ,height:350, borderRadius: 2, backgroundColor: '#FFFFFF',borderColor: 'primary.main', borderStyle: 'dashed' }}>
+                        <Paper elevation={10} sx={{ padding: 5, width: 1150, height: 350, borderRadius: 2, backgroundColor: '#FFFFFF', borderColor: 'primary.main', borderStyle: 'dashed' }}>
                             <SavingsIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
                             <Typography variant="h6" color="textSecondary" mb={1}>
                                 No budgets set up yet
@@ -138,16 +239,51 @@ function BudgetsPage() {
                 )}
             </Grid>
 
-            <AddBudgetDialog open={isAddBudgetDialogOpen} onClose={handleAddBudgetClose} onAddBudget={handleAddNewBudget} />
+            <AddBudgetDialog 
+                open={isAddBudgetDialogOpen} 
+                onClose={handleAddBudgetClose} 
+                onAddBudget={handleAddNewBudget}
+                categories={categories}
+                onAddCustomCategory={fetchBudgetsCategoriesTransactions}
+                editingBudget={editingBudget}
+            />
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 }
 
-function AddBudgetDialog({ open, onClose, onAddBudget }) {
+function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCategory, editingBudget }) {
     const [category, setCategory] = useState('');
     const [budgetAmount, setBudgetAmount] = useState(0);
     const [period, setPeriod] = useState('monthly');
-    const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA').split('/').reverse().join('-')); //YYYY-MM-DD
+    const [startDate, setStartDate] = useState(new Date().toLocaleDateString('en-CA').split('/').reverse().join('-'));
+    const [isAddingCustomCategory, setIsAddingCustomCategory] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (editingBudget) {
+            setCategory(categories.find(cat => cat.id === editingBudget.category)?.name || '');
+            setBudgetAmount(Number(editingBudget.amount));
+            setPeriod(editingBudget.period);
+            setStartDate(editingBudget.start_date);
+        } else {
+            setCategory('');
+            setBudgetAmount(0);
+            setPeriod('monthly');
+            setStartDate(new Date().toLocaleDateString('en-CA').split('/').reverse().join('-'));
+        }
+    }, [editingBudget, categories]);
 
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
@@ -165,16 +301,48 @@ function AddBudgetDialog({ open, onClose, onAddBudget }) {
         setStartDate(event.target.value);
     };
 
+    const handleAddCustomCategory = async () => {
+        if (!newCategoryName.trim()) {
+            setError('Category name is required');
+            return;
+        }
+
+        try {
+            await categoryAPI.create({
+                name: newCategoryName,
+                transaction_type: 'expense'
+            });
+            
+            setNewCategoryName('');
+            setIsAddingCustomCategory(false);
+            onAddCustomCategory(); // Refresh categories
+            setError('');
+        } catch (err) {
+            console.error('Error creating category:', err);
+            setError('Failed to create category');
+        }
+    };
+
     const handleAddBudget = () => {
-        // Call the onAddBudget function passed from the parent component
-        onAddBudget({ category, budgetAmount, period, startDate });
-        onClose(); // Close the dialog after adding
+        if (!category) {
+            setError('Please select a category');
+            return;
+        }
+        onAddBudget({
+            category,
+            budgetAmount,
+            period,
+            startDate,
+            spent: 0,
+            allocated: budgetAmount
+        });
+        onClose();
     };
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                Add Budget
+                {editingBudget ? 'Edit Budget' : 'Add Budget'}
                 <IconButton aria-label="close" onClick={onClose}>
                     <CloseIcon />
                 </IconButton>
@@ -182,26 +350,64 @@ function AddBudgetDialog({ open, onClose, onAddBudget }) {
             <DialogContent>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <FormControl fullWidth>
-                            <InputLabel id="category-label">Category</InputLabel>
-                            <Select
-                                labelId="category-label"
-                                id="category"
-                                value={category}
-                                onChange={handleCategoryChange}
-                            >
-                                <MenuItem value="">
-                                    <em>Select category</em>
-                                </MenuItem>
-                                <MenuItem value="groceries">Groceries</MenuItem>
-                                <MenuItem value="utilities">Utilities</MenuItem>
-                                <MenuItem value="rent">Rent</MenuItem>
-                                {/* Add more categories here */}
-                            </Select>
-                        </FormControl>
-                        <Box mt={1}>
-                            <Button size="small">+ Add custom category</Button>
-                        </Box>
+                        {!isAddingCustomCategory ? (
+                            <>
+                                <FormControl fullWidth>
+                                    <InputLabel id="category-label">Category</InputLabel>
+                                    <Select
+                                        labelId="category-label"
+                                        id="category"
+                                        value={category}
+                                        onChange={handleCategoryChange}
+                                        error={!!error}
+                                    >
+                                        <MenuItem value="">
+                                            <em>Select category</em>
+                                        </MenuItem>
+                                        {categories.map((cat) => (
+                                            <MenuItem key={cat.id} value={cat.name}>
+                                                {cat.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Box mt={1}>
+                                    <Button size="small" onClick={() => setIsAddingCustomCategory(true)}>
+                                        + Add custom category
+                                    </Button>
+                                </Box>
+                            </>
+                        ) : (
+                            <Box>
+                                <TextField
+                                    fullWidth
+                                    label="New Category Name"
+                                    value={newCategoryName}
+                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                    error={!!error}
+                                    helperText={error}
+                                />
+                                <Box mt={1} display="flex" gap={1}>
+                                    <Button 
+                                        size="small" 
+                                        onClick={handleAddCustomCategory}
+                                        variant="contained"
+                                    >
+                                        Add Category
+                                    </Button>
+                                    <Button 
+                                        size="small" 
+                                        onClick={() => {
+                                            setIsAddingCustomCategory(false);
+                                            setNewCategoryName('');
+                                            setError('');
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </Box>
+                            </Box>
+                        )}
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <TextField
@@ -211,16 +417,18 @@ function AddBudgetDialog({ open, onClose, onAddBudget }) {
                             value={budgetAmount}
                             onChange={handleBudgetAmountChange}
                             inputProps={{ min: 0, step: 0.01 }}
+                            InputLabelProps={{ shrink: true }}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <FormControl fullWidth>
-                            <InputLabel id="period-label">Period</InputLabel>
+                            <InputLabel id="period-label" shrink>Period</InputLabel>
                             <Select
                                 labelId="period-label"
                                 id="period"
                                 value={period}
                                 onChange={handlePeriodChange}
+                                label="Period"
                             >
                                 <MenuItem value="monthly">Monthly</MenuItem>
                                 <MenuItem value="weekly">Weekly</MenuItem>
@@ -244,12 +452,40 @@ function AddBudgetDialog({ open, onClose, onAddBudget }) {
                         Cancel
                     </Button>
                     <Button variant="contained" onClick={handleAddBudget}>
-                        Add Budget
+                        {editingBudget ? 'Update Budget' : 'Add Budget'}
                     </Button>
                 </Box>
             </DialogContent>
         </Dialog>
     );
 }
+
+const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining, percent, onEdit, onDelete }) => (
+    <Card sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', mb: 2, minWidth: 320 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{name}</Typography>
+            <Box>
+                <IconButton aria-label="edit" onClick={onEdit}><EditIcon /></IconButton>
+                <IconButton aria-label="delete" onClick={onDelete}><DeleteIcon /></IconButton>
+            </Box>
+        </Box>
+        <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 0.5 }}>
+            {period.charAt(0).toUpperCase() + period.slice(1)} Budget
+        </Typography>
+        <Box display="flex" alignItems="center" color="text.secondary" sx={{ mb: 1 }}>
+            <CalendarTodayIcon sx={{ fontSize: 18, mr: 1 }} />
+            <Typography variant="body2">Started {new Date(startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</Typography>
+        </Box>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+            <Typography sx={{ fontWeight: 500 }}>${spent.toFixed(2)}</Typography>
+            <Typography sx={{ fontWeight: 500 }}>of ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+        </Box>
+        <LinearProgress variant="determinate" value={percent} sx={{ height: 8, borderRadius: 4, backgroundColor: '#f5f5f5', mb: 1 }} />
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="body2" color="textSecondary">Remaining: ${Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+            <Typography variant="body2" color="textSecondary">{percent.toFixed(0)}%</Typography>
+        </Box>
+    </Card>
+);
 
 export default BudgetsPage;

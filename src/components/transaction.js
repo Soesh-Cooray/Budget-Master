@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,Typography,Button,TextField,Select,Dialog,DialogTitle,DialogContent,DialogActions,ThemeProvider,
   createTheme,Table,TableHead,TableBody,TableRow,TableCell,IconButton,FormControl,InputLabel,
+  MenuItem, styled, CircularProgress, Snackbar, Alert
 } from '@mui/material';
 
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import { MenuItem, styled } from '@mui/material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useNavigate } from 'react-router-dom';
+import { transactionAPI, categoryAPI } from '../api';  // Import the API functions
 
 const theme = createTheme({
   components: {
@@ -35,36 +36,237 @@ function TransactionsPage() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
+  const [expenseCategories, setExpenseCategories] = useState([]);
+  const [incomeCategories, setIncomeCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filterType, setFilterType] = useState('all');
+  const [filterCategory, setFilterCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
   // Form state
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
   const [category, setCategory] = useState('');
-  const [type, setType] = useState('');
+  const [type, setType] = useState('expense'); // Default to expense
   const [amount, setAmount] = useState('');
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+  
+  // Update available categories when type changes
+  useEffect(() => {
+    if (type === 'expense') {
+      setCategory(''); // Reset selected category
+    } else if (type === 'income') {
+      setCategory(''); // Reset selected category
+    }
+  }, [type]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [expensesRes, incomesRes, categoriesRes] = await Promise.all([
+        transactionAPI.getExpenses(),
+        transactionAPI.getIncomes(),
+        categoryAPI.getAll()
+      ]);
+      
+      setExpenses(expensesRes.data);
+      setIncomes(incomesRes.data);
+      setAllCategories(categoriesRes.data);
+      
+      // Separate categories by type
+      setExpenseCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'expense'));
+      setIncomeCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'income'));
+      
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError('Failed to load data. Please try again.');
+      setLoading(false);
+      
+      // If unauthorized, redirect to login
+      if (err.response && err.response.status === 401) {
+        handleLogout();
+      }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    // Optionally clear other user-related data from localStorage or state
-    navigate('/signin'); // Redirect to the signin page
+    navigate('/signin');
   };
 
-
-
   const handleOpenAddDialog = () => {
-      setOpenAddDialog(true);
+    // Reset form when opening dialog
+    setDescription('');
+    setAmount('');
+    setDate(new Date().toISOString().split('T')[0]);
+    setCategory('');
+    setType('expense');
+    setEditingTransaction(null);
+    setOpenAddDialog(true);
   };
 
   const handleCloseAddDialog = () => {
-      setOpenAddDialog(false);
+    setOpenAddDialog(false);
   };
 
-  
+  const handleAddTransaction = async () => {
+    // Basic validation
+    if (!description || !amount || !date || !category) {
+      setSnackbar({
+        open: true,
+        message: 'Please fill in all fields',
+        severity: 'error'
+      });
+      return;
+    }
+
+    try {
+      const transactionData = {
+        description,
+        amount: parseFloat(amount),
+        date,
+        category,
+        transaction_type: type
+      };
+
+      if (editingTransaction) {
+        // Update existing transaction
+        await transactionAPI.update(editingTransaction.id, transactionData);
+        setSnackbar({
+          open: true,
+          message: 'Transaction updated successfully',
+          severity: 'success'
+        });
+      } else {
+        // Create new transaction
+        await transactionAPI.create(transactionData);
+        setSnackbar({
+          open: true,
+          message: 'Transaction added successfully',
+          severity: 'success'
+        });
+      }
+      
+      // Close dialog and refresh data
+      handleCloseAddDialog();
+      fetchData();
+    } catch (err) {
+      console.error('Error saving transaction:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to save transaction',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleEditTransaction = (transaction) => {
+    setEditingTransaction(transaction);
+    setDescription(transaction.description);
+    setAmount(transaction.amount.toString());
+    setDate(transaction.date);
+    setCategory(transaction.category);
+    setType(transaction.transaction_type);
+    setOpenAddDialog(true);
+  };
+
+  const handleDeleteClick = (transaction) => {
+    setTransactionToDelete(transaction);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!transactionToDelete) return;
+    
+    try {
+      await transactionAPI.delete(transactionToDelete.id);
+      setSnackbar({
+        open: true,
+        message: 'Transaction deleted successfully',
+        severity: 'success'
+      });
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+      setSnackbar({
+        open: true,
+        message: 'Failed to delete transaction',
+        severity: 'error'
+      });
+    } finally {
+      setDeleteConfirmOpen(false);
+      setTransactionToDelete(null);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({
+      ...snackbar,
+      open: false
+    });
+  };
+
+  // Filter transactions based on search term, type filter, and category filter
+  const filteredTransactions = () => {
+    let transactions = [...expenses, ...incomes];
+    
+    // Apply search filter
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      transactions = transactions.filter(t => 
+        t.description.toLowerCase().includes(search)
+      );
+    }
+    
+    // Apply type filter
+    if (filterType !== 'all') {
+      transactions = transactions.filter(t => t.transaction_type === filterType);
+    }
+    
+    // Apply category filter
+    if (filterCategory !== 'all') {
+      transactions = transactions.filter(t => t.category === parseInt(filterCategory));
+    }
+    
+    return transactions;
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <Typography color="error">{error}</Typography>
+        <Button onClick={fetchData} sx={{ ml: 2 }}>Retry</Button>
+      </Box>
+    );
+  }
   
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ backgroundColor: '#f0f7ff', padding: 2 }}>
+      <Box sx={{ backgroundColor: '#f0f7ff', padding: 2, minHeight: '100vh' }}>
         {/* Header */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Box>
@@ -73,19 +275,21 @@ function TransactionsPage() {
             </Typography>
             <Typography variant="body1">Manage your income and expenses</Typography>
           </Box>
-          
         </Box>
 
         {/* Filters */}
         <Box display="flex" alignItems="center" mb={2} justifyContent="space-between">
           <Box display="flex" alignItems="center">
             <TextField
-              label="Search transactions...  "
+              label="Search transactions..."
               size="small"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ mr: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 },width: 200, }}
             />
             <Select
-              value="all"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
               size="small"
               sx={{ mr: 1, borderRadius: 2 }}
               MenuProps={{
@@ -101,7 +305,8 @@ function TransactionsPage() {
               <HoverMenuItem value="expense">Expense</HoverMenuItem>
             </Select>
             <Select
-              value="all"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
               size="small"
               sx={{ borderRadius: 2 }}
               MenuProps={{
@@ -112,62 +317,64 @@ function TransactionsPage() {
                 },
               }}
             > 
-            <HoverMenuItem value="all">All Categories</HoverMenuItem>
-            <HoverMenuItem value="housing">Housing</HoverMenuItem>
-            <HoverMenuItem value="food">Food</HoverMenuItem>
-            <HoverMenuItem value="transpotation">Transportation</HoverMenuItem>
-            <HoverMenuItem value="entertainment">Entertainment</HoverMenuItem>
-            <HoverMenuItem value="shopping">Shopping</HoverMenuItem>
-            <HoverMenuItem value="healthcare">Healthcare</HoverMenuItem>
-            <HoverMenuItem value="utilities">Utilities</HoverMenuItem>
+              <HoverMenuItem value="all">All Categories</HoverMenuItem>
+              {allCategories.map((cat) => (
+                <HoverMenuItem key={cat.id} value={cat.id}>{cat.name}</HoverMenuItem>
+              ))}
             </Select>
           </Box>
-          <Button variant="contained" sx={{ borderRadius: 2 }} onClick={handleOpenAddDialog}>
-          + Add Transaction
+          <Button 
+            variant="contained" 
+            sx={{ borderRadius: 2 }} 
+            onClick={handleOpenAddDialog}
+          >
+            + Add Transaction
           </Button>
         </Box>
 
         {/* Transactions Table or Clean State */}
-        {expenses.length > 0 || incomes.length > 0 ?  ( 
-    <Table>
-        <TableHead>
-            <TableRow sx={{ backgroundColor: '#e0f7fa' }}>
+        {filteredTransactions().length > 0 ? ( 
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: '#e0f7fa' }}>
                 <TableCell>Description</TableCell>
                 <TableCell>Date</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Type</TableCell>
                 <TableCell>Amount</TableCell>
                 <TableCell>Actions</TableCell>
-            </TableRow>
-        </TableHead>
-        <TableBody>
-            {[...expenses.map(exp => ({ ...exp, type: 'Expense' })), ...incomes.map(inc => ({ ...inc, type: 'Income' }))].map((transaction) => (
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredTransactions().map((transaction) => (
                 <TableRow key={transaction.id}>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>{transaction.date}</TableCell>
-                    <TableCell>{categories.find(cat => cat.id === transaction.category)?.name || 'Unknown'}</TableCell>
-                    <TableCell>{transaction.type}</TableCell>
-                    <TableCell
-                        sx={{
-                            color: transaction.type === 'Income' ? 'green' : 'red',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        {transaction.type === 'Income' ? '+' : '-'}${transaction.amount.toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                        <IconButton>
-                            <EditIcon />
-                        </IconButton>
-                        <IconButton>
-                            <DeleteIcon />
-                        </IconButton>
-                    </TableCell>
+                  <TableCell>{transaction.description}</TableCell>
+                  <TableCell>{transaction.date}</TableCell>
+                  <TableCell>{transaction.category_name || 'Unknown'}</TableCell>
+                  <TableCell>
+                    {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      color: transaction.transaction_type === 'income' ? 'green' : 'red',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {transaction.transaction_type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleEditTransaction(transaction)}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDeleteClick(transaction)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
-            ))}
-        </TableBody>
-    </Table>
-    ) : (
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
           // Clean state when no transactions are available
           <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh">
             <MonetizationOnIcon sx={{ fontSize: 200, color: '#0EA9FF' }} />
@@ -185,7 +392,7 @@ function TransactionsPage() {
           </Box>
         )}
 
-        {/* Add Transaction Dialog */}
+        {/* Add/Edit Transaction Dialog */}
         <Dialog
           open={openAddDialog}
           onClose={handleCloseAddDialog}
@@ -195,28 +402,60 @@ function TransactionsPage() {
             },
           }}
         >
-          <DialogTitle>Add Transaction</DialogTitle>
+          <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
           <DialogContent>
-            <TextField label="What was this transaction for" fullWidth margin="normal" value={description} onChange={(e) => setDescription(e.target.value)} />
-            <TextField fullWidth margin="normal" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <TextField 
+              label="What was this transaction for" 
+              fullWidth 
+              margin="normal" 
+              value={description} 
+              onChange={(e) => setDescription(e.target.value)} 
+            />
+            <TextField 
+              fullWidth 
+              margin="normal" 
+              type="date" 
+              value={date} 
+              onChange={(e) => setDate(e.target.value)} 
+              InputLabelProps={{ shrink: true }}
+              label="Date"
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Type</InputLabel>
+              <Select 
+                value={type} 
+                onChange={(e) => setType(e.target.value)}
+              >
+                <HoverMenuItem value="income">Income</HoverMenuItem>
+                <HoverMenuItem value="expense">Expense</HoverMenuItem>
+              </Select>
+            </FormControl>
             <FormControl fullWidth margin="normal">
               <InputLabel>Select Category</InputLabel>
-              <Select value={category} onChange={(e) => setCategory(e.target.value)} >
-                {categories.map((cat) => (
+              <Select 
+                value={category} 
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {type === 'expense' && expenseCategories.map((cat) => (
+                  <HoverMenuItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </HoverMenuItem>
+                ))}
+                {type === 'income' && incomeCategories.map((cat) => (
                   <HoverMenuItem key={cat.id} value={cat.id}>
                     {cat.name}
                   </HoverMenuItem>
                 ))}
               </Select>
             </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Type</InputLabel>
-              <Select value={type} onChange={(e) => setType(e.target.value)}>
-                <HoverMenuItem value="income">Income</HoverMenuItem>
-                <HoverMenuItem value="expense">Expense</HoverMenuItem>
-              </Select>
-            </FormControl>
-            <TextField label="Amount" fullWidth margin="normal" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+            <TextField 
+              label="Amount" 
+              fullWidth 
+              margin="normal" 
+              type="number" 
+              value={amount} 
+              onChange={(e) => setAmount(e.target.value)} 
+            />
           </DialogContent>
           <DialogActions>
             <Button
@@ -225,11 +464,65 @@ function TransactionsPage() {
             >
               Cancel
             </Button>
-            <Button variant="contained"  sx={{ borderRadius: 4, '&:hover': { backgroundColor: '#16a34a', color: '#f9fafb' } }}>
-              Add
+            <Button 
+              variant="contained" 
+              onClick={handleAddTransaction}
+              sx={{ borderRadius: 4, '&:hover': { backgroundColor: '#16a34a', color: '#f9fafb' } }}
+            >
+              {editingTransaction ? 'Update' : 'Add'}
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteConfirmOpen}
+          onClose={() => setDeleteConfirmOpen(false)}
+          PaperProps={{
+            style: {
+              borderRadius: 10,
+            },
+          }}
+        >
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to delete this transaction? This action cannot be undone.
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setDeleteConfirmOpen(false)}
+              sx={{ borderRadius: 4 }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="contained" 
+              color="error"
+              onClick={handleDeleteConfirm}
+              sx={{ borderRadius: 4 }}
+            >
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Snackbar for notifications */}
+        <Snackbar 
+          open={snackbar.open} 
+          autoHideDuration={6000} 
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert 
+            onClose={handleCloseSnackbar} 
+            severity={snackbar.severity} 
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </ThemeProvider>
   );

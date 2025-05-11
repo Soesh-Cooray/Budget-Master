@@ -12,7 +12,8 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  CircularProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
@@ -28,6 +29,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { transactionAPI } from '../api';
 
 // Register ChartJS components
 ChartJS.register(
@@ -79,54 +81,164 @@ const TabPanel = (props) => {
 const Reports = () => {
   const [tabValue, setTabValue] = useState(0);
   const [timeRange, setTimeRange] = useState('6');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [financialData, setFinancialData] = useState({
-    totalIncome: 50000,
-    totalExpenses: 27000,
-    netBalance: 23000,
+    totalIncome: 0,
+    totalExpenses: 0,
+    netBalance: 0,
     incomeVsExpenses: {
-      labels: ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'],
-      income: [0, 0, 0, 0, 48000, 0],
-      expenses: [0, 0, 0, 0, 0, 27000]
+      labels: [],
+      income: [],
+      expenses: []
     },
     expenseBreakdown: {
-      labels: ['Dining Out', 'Rent', 'Utilities'],
-      values: [20000, 5000, 2000],
-      percentages: [74.1, 18.5, 7.4],
-      colors: ['#f06292', '#7986cb', '#ff7043']
+      labels: [],
+      values: [],
+      percentages: [],
+      colors: ['#f06292', '#7986cb', '#ff7043', '#4caf50', '#ff9800', '#2196f3']
     },
     categorySpendingOverTime: {
-      labels: ['Dec 2024', 'Jan 2025', 'Feb 2025', 'Mar 2025', 'Apr 2025', 'May 2025'],
-      datasets: [
-        {
-          label: 'Groceries',
-          data: [0, 0, 0, 0, 0, 0],
-          backgroundColor: '#ffb74d'
-        },
-        {
-          label: 'Utilities',
-          data: [0, 0, 0, 0, 0, 2000],
-          backgroundColor: '#ff7043'
-        },
-        {
-          label: 'Rent',
-          data: [0, 0, 0, 0, 0, 5000],
-          backgroundColor: '#7986cb'
-        },
-        {
-          label: 'Dining Out',
-          data: [0, 0, 0, 0, 0, 20000],
-          backgroundColor: '#f06292'
-        }
-      ]
+      labels: [],
+      datasets: []
     }
   });
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
+  useEffect(() => {
+    fetchData();
+  }, [timeRange]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [expensesRes, incomesRes] = await Promise.all([
+        transactionAPI.getExpenses(),
+        transactionAPI.getIncomes()
+      ]);
+
+      const expenses = expensesRes.data;
+      const incomes = incomesRes.data;
+
+      // Calculate totals
+      const totalIncome = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
+      const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+      const netBalance = totalIncome - totalExpenses;
+
+      // Process data for charts
+      const months = getMonthsForTimeRange();
+      const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
+      const expenseBreakdown = processExpenseBreakdownData(expenses);
+      const categorySpending = processCategorySpendingOverTime(expenses, months);
+
+      setFinancialData({
+        totalIncome,
+        totalExpenses,
+        netBalance,
+        incomeVsExpenses,
+        expenseBreakdown,
+        categorySpendingOverTime: categorySpending
+      });
+
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching reports data:', err);
+      setError('Failed to load reports data');
+      setLoading(false);
+    }
   };
 
-  const handleTimeRangeChange = (event) => {
-    setTimeRange(event.target.value);
+  const getMonthsForTimeRange = () => {
+    const months = [];
+    const today = new Date();
+    const range = parseInt(timeRange);
+    
+    for (let i = range - 1; i >= 0; i--) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      months.push(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
+    }
+    return months;
+  };
+
+  const processIncomeVsExpensesData = (incomes, expenses, months) => {
+    const incomeData = new Array(months.length).fill(0);
+    const expenseData = new Array(months.length).fill(0);
+
+    // Process incomes
+    incomes.forEach(income => {
+      const date = new Date(income.date);
+      const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
+      if (monthIndex !== -1) {
+        incomeData[monthIndex] += parseFloat(income.amount);
+      }
+    });
+
+    // Process expenses
+    expenses.forEach(expense => {
+      const date = new Date(expense.date);
+      const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
+      if (monthIndex !== -1) {
+        expenseData[monthIndex] += parseFloat(expense.amount);
+      }
+    });
+
+    return {
+      labels: months,
+      income: incomeData,
+      expenses: expenseData
+    };
+  };
+
+  const processExpenseBreakdownData = (expenses) => {
+    const categoryTotals = {};
+    let totalExpenses = 0;
+
+    // Calculate totals per category
+    expenses.forEach(expense => {
+      const category = expense.category_name || 'Uncategorized';
+      const amount = parseFloat(expense.amount);
+      categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+      totalExpenses += amount;
+    });
+
+    // Convert to arrays for chart
+    const labels = Object.keys(categoryTotals);
+    const values = Object.values(categoryTotals);
+    const percentages = values.map(value => ((value / totalExpenses) * 100).toFixed(1));
+
+    return {
+      labels,
+      values,
+      percentages,
+      colors: financialData.expenseBreakdown.colors.slice(0, labels.length)
+    };
+  };
+
+  const processCategorySpendingOverTime = (expenses, months) => {
+    const categories = [...new Set(expenses.map(expense => expense.category_name || 'Uncategorized'))];
+    const datasets = categories.map((category, index) => {
+      const data = new Array(months.length).fill(0);
+      
+      expenses
+        .filter(expense => (expense.category_name || 'Uncategorized') === category)
+        .forEach(expense => {
+          const date = new Date(expense.date);
+          const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
+          if (monthIndex !== -1) {
+            data[monthIndex] += parseFloat(expense.amount);
+          }
+        });
+
+      return {
+        label: category,
+        data,
+        backgroundColor: financialData.expenseBreakdown.colors[index % financialData.expenseBreakdown.colors.length]
+      };
+    });
+
+    return {
+      labels: months,
+      datasets
+    };
   };
 
   // Chart configurations
@@ -273,6 +385,22 @@ const Reports = () => {
     },
   };
 
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box mb={4}>
@@ -291,7 +419,7 @@ const Reports = () => {
             labelId="time-range-label"
             id="time-range"
             value={timeRange}
-            onChange={handleTimeRangeChange}
+            onChange={(e) => setTimeRange(e.target.value)}
             label="Last"
           >
             <MenuItem value="1">Last month</MenuItem>
@@ -305,43 +433,43 @@ const Reports = () => {
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} md={4}>
           <StyledCard>
-          <Card sx={{ height: 150, width: 330, padding: 2 }}>
-            <Box>
-              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                Total Income
-              </Typography>
-              <AmountTypography color="income">
-                ${financialData.totalIncome.toLocaleString()}
-              </AmountTypography>
-            </Box>
+            <Card sx={{ height: 150, width: 330, padding: 2 }}>
+              <Box>
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  Total Income
+                </Typography>
+                <AmountTypography color="income">
+                  ${financialData.totalIncome.toLocaleString()}
+                </AmountTypography>
+              </Box>
             </Card>
           </StyledCard>
         </Grid>
         <Grid item xs={12} md={4}>
           <StyledCard>
-          <Card sx={{ height: 150, width: 330, padding: 2 }}>
-            <Box>
-              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                Total Expenses
-              </Typography>
-              <AmountTypography color="expense">
-                ${financialData.totalExpenses.toLocaleString()}
-              </AmountTypography>
-            </Box>
+            <Card sx={{ height: 150, width: 330, padding: 2 }}>
+              <Box>
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  Total Expenses
+                </Typography>
+                <AmountTypography color="expense">
+                  ${financialData.totalExpenses.toLocaleString()}
+                </AmountTypography>
+              </Box>
             </Card>
           </StyledCard>
         </Grid>
         <Grid item xs={12} md={4}>
           <StyledCard>
-          <Card sx={{ height: 150, width: 330,padding: 2 }}>
-            <Box>
-              <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                Net Balance
-              </Typography>
-              <AmountTypography color="balance">
-                ${financialData.netBalance.toLocaleString()}
-              </AmountTypography>
-            </Box>
+            <Card sx={{ height: 150, width: 330, padding: 2 }}>
+              <Box>
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  Net Balance
+                </Typography>
+                <AmountTypography color="balance">
+                  ${financialData.netBalance.toLocaleString()}
+                </AmountTypography>
+              </Box>
             </Card>
           </StyledCard>
         </Grid>
@@ -350,7 +478,7 @@ const Reports = () => {
       <Paper sx={{ mb: 4 }}>
         <Tabs 
           value={tabValue} 
-          onChange={handleTabChange} 
+          onChange={(e, newValue) => setTabValue(newValue)} 
           indicatorColor="primary"
           textColor="primary"
           sx={{ borderBottom: 1, borderColor: 'divider', borderRadius: 4}}
@@ -364,37 +492,66 @@ const Reports = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <StyledCard>
-              <Card sx={{ height: 500, width: 500}}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Income vs Expenses
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Your financial balance over time
-                  </Typography>
-                  <Box height={350}>
-                    <Bar data={incomeExpenseChartData} options={incomeExpenseChartOptions} />
-                  </Box>
-                </CardContent>
+                <Card sx={{ height: 500, width: 500 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Income vs Expenses
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Your financial balance over time
+                    </Typography>
+                    <Box height={350}>
+                      <Bar 
+                        data={{
+                          labels: financialData.incomeVsExpenses.labels,
+                          datasets: [
+                            {
+                              label: 'Income',
+                              data: financialData.incomeVsExpenses.income,
+                              backgroundColor: '#00C853',
+                              barThickness: 20,
+                            },
+                            {
+                              label: 'Expenses',
+                              data: financialData.incomeVsExpenses.expenses,
+                              backgroundColor: '#FF3D00',
+                              barThickness: 20,
+                            },
+                          ],
+                        }} 
+                        options={incomeExpenseChartOptions} 
+                      />
+                    </Box>
+                  </CardContent>
                 </Card>
               </StyledCard>
             </Grid>
             <Grid item xs={12} md={6}>
               <StyledCard>
-                <Card sx={{ height: 500, width: 550}}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Expense Breakdown
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    Your spending by category
-                  </Typography>
-                  <Box height={350} display="flex" justifyContent="center">
-                    <Box width="80%" height="100%">
-                      <Doughnut data={expenseBreakdownData} options={doughnutOptions} />
+                <Card sx={{ height: 500, width: 550 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Expense Breakdown
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Your spending by category
+                    </Typography>
+                    <Box height={350} display="flex" justifyContent="center">
+                      <Box width="80%" height="100%">
+                        <Doughnut 
+                          data={{
+                            labels: financialData.expenseBreakdown.labels,
+                            datasets: [{
+                              data: financialData.expenseBreakdown.values,
+                              backgroundColor: financialData.expenseBreakdown.colors,
+                              borderWidth: 0,
+                            }],
+                          }} 
+                          options={doughnutOptions} 
+                        />
+                      </Box>
                     </Box>
-                  </Box>
-                </CardContent>
+                  </CardContent>
                 </Card>
               </StyledCard>
             </Grid>
@@ -412,7 +569,17 @@ const Reports = () => {
               </Typography>
               <Box height={400} display="flex" justifyContent="center">
                 <Box width="70%" height="100%">
-                  <Pie data={expenseBreakdownData} options={pieOptions} />
+                  <Pie 
+                    data={{
+                      labels: financialData.expenseBreakdown.labels,
+                      datasets: [{
+                        data: financialData.expenseBreakdown.values,
+                        backgroundColor: financialData.expenseBreakdown.colors,
+                        borderWidth: 0,
+                      }],
+                    }} 
+                    options={pieOptions} 
+                  />
                 </Box>
               </Box>
             </CardContent>
@@ -430,10 +597,7 @@ const Reports = () => {
               </Typography>
               <Box height={400}>
                 <Bar 
-                  data={{
-                    labels: financialData.categorySpendingOverTime.labels,
-                    datasets: financialData.categorySpendingOverTime.datasets
-                  }} 
+                  data={financialData.categorySpendingOverTime}
                   options={categorySpendingOptions} 
                 />
               </Box>
