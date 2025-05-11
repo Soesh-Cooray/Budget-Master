@@ -7,6 +7,7 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import { transactionAPI, budgetAPI, categoryAPI } from '../api';
+import { jwtDecode } from 'jwt-decode';
 
 // Register the chart components
 ChartJS.register(
@@ -89,6 +90,26 @@ const Dashboard = () => {
   const [recentBudgets, setRecentBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
+
+  // Get username from JWT token
+  let username = '';
+  const token = localStorage.getItem('accessToken');
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      username = decoded.username || decoded.user || decoded.email || '';
+    } catch (e) {
+      username = '';
+    }
+  }
+
+  // Time-based greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
 
   useEffect(() => {
     fetchData();
@@ -306,7 +327,7 @@ const Dashboard = () => {
   return (
     <Box sx={{ p: 3, bgcolor: '#f0f7ff', minHeight: '100vh' }}>
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5 }}>
-        Financial Overview
+        {username ? `${getGreeting()}, ${username}` : getGreeting()}
       </Typography>
       <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
         Here's an overview of your finances
