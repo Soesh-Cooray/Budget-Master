@@ -352,14 +352,15 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
                     <Grid item xs={12}>
                         {!isAddingCustomCategory ? (
                             <>
-                                <FormControl fullWidth>
-                                    <InputLabel id="category-label">Category</InputLabel>
+                                <FormControl fullWidth margin="normal">
+                                    <InputLabel id="category-label" shrink>Category</InputLabel>
                                     <Select
                                         labelId="category-label"
                                         id="category"
                                         value={category}
                                         onChange={handleCategoryChange}
                                         error={!!error}
+                                        label="Category"
                                     >
                                         <MenuItem value="">
                                             <em>Select category</em>
@@ -418,10 +419,11 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
                             onChange={handleBudgetAmountChange}
                             inputProps={{ min: 0, step: 0.01 }}
                             InputLabelProps={{ shrink: true }}
+                            margin="normal"
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth>
+                        <FormControl fullWidth margin="normal">
                             <InputLabel id="period-label" shrink>Period</InputLabel>
                             <Select
                                 labelId="period-label"
