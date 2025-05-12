@@ -1,7 +1,7 @@
 import React from 'react';
 import {
     Drawer, List, ListItem, ListItemIcon, ListItemText, Toolbar,
-    Typography, IconButton, Box
+    Typography, IconButton, Box, useTheme, Switch
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -9,14 +9,19 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import MenuIcon from '@mui/icons-material/Menu';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DRAWER_WIDTH } from '../constants';
+import { useTheme as useCustomTheme } from '../context/ThemeContext';
 
 const COLLAPSED_WIDTH = 69;
 
 function Sidebar({ open, onClose }) {
     const navigate = useNavigate();
     const location = useLocation();
+    const theme = useTheme();
+    const { mode, toggleColorMode } = useCustomTheme();
 
     const handleNavigation = (path) => {
         navigate(path);
@@ -186,6 +191,36 @@ function Sidebar({ open, onClose }) {
                     <ListItemText primary="Logout" sx={{ opacity: open ? 1 : 0 }} />
                 </ListItem>
             </List>
+
+            <Box sx={{ mt: 'auto', p: 2 }}>
+                <ListItem
+                    sx={{
+                        minHeight: 48,
+                        justifyContent: open ? 'initial' : 'center',
+                        px: 2.5,
+                    }}
+                >
+                    <ListItemIcon
+                        sx={{
+                            minWidth: 0,
+                            mr: open ? 3 : 'auto',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                    </ListItemIcon>
+                    {open && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                            <Typography sx={{ flexGrow: 1 }}>Dark Mode</Typography>
+                            <Switch
+                                edge="end"
+                                onChange={toggleColorMode}
+                                checked={mode === 'dark'}
+                            />
+                        </Box>
+                    )}
+                </ListItem>
+            </Box>
         </Drawer>
     );
 }

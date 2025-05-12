@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Box, CssBaseline } from '@mui/material';
-import { Routes, Route, useLocation,Navigate     } from 'react-router-dom';
+import { Box } from '@mui/material';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import HomePage from './components/homepage';
 import SignInPage from './components/signin';
 import SignUpPage from './components/signup';
@@ -10,7 +10,7 @@ import BudgetsPage from './components/budgets';
 import Dashboard from './components/dashboard';
 import Reports from './components/reports';
 import Sidebar from './components/sidebar';
-
+import { ThemeProvider } from './context/ThemeContext';
 import { DRAWER_WIDTH, COLLAPSED_WIDTH } from './constants';
 
 function App() {
@@ -55,56 +55,53 @@ function App() {
     }, [location]);
 
     return (
-        <Box sx={{ 
-            display: 'flex',
-            margin: 0,
-            padding: 0,
-            width: '100%',
-            height: 'auto',
-            minHeight: '100vh',
-            overflow: 'auto',
-            backgroundColor: '#f0f7ff'
-        }}>
-            <CssBaseline />
+        <ThemeProvider>
+            <Box sx={{ 
+                display: 'flex',
+                margin: 0,
+                padding: 0,
+                width: '100%',
+                height: 'auto',
+                minHeight: '100vh',
+                overflow: 'auto',
+            }}>
+                {showSidebar && (
+                    <Sidebar open={open} onClose={handleDrawerToggle} />
+                )}
 
-            {showSidebar && (
-                <Sidebar open={open} onClose={handleDrawerToggle} />
-            )}
-
-            <Box
-                component="main"
-                sx={{
-                    flexGrow: 1,
-                    width: showSidebar ? 
-                        `calc(100% - ${open ? DRAWER_WIDTH : COLLAPSED_WIDTH}px)` : 
-                        '100%',
-                    marginLeft: showSidebar ? 
-                        `${open ? DRAWER_WIDTH : COLLAPSED_WIDTH}px` : 
-                        0,
-                    transition: (theme) =>
-                        theme.transitions.create(['width', 'margin'], {
-                            easing: theme.transitions.easing.sharp,
-                            duration: theme.transitions.duration.standard,
-                        }),
-                    padding: 0,
-                    overflow: 'visible',
-                    backgroundColor: '#f0f7ff',
-                }}
-            >
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/signin" element={<SignInPage />} />
-                    <Route path="/signup" element={<SignUpPage />} />
-                    <Route path="/transaction" element={<TransactionsPage />} />
-                    <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-                    <Route path="/budgets" element={<BudgetsPage />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                    
-                </Routes>
+                <Box
+                    component="main"
+                    sx={{
+                        flexGrow: 1,
+                        width: showSidebar ? 
+                            `calc(100% - ${open ? DRAWER_WIDTH : COLLAPSED_WIDTH}px)` : 
+                            '100%',
+                        marginLeft: showSidebar ? 
+                            `${open ? DRAWER_WIDTH : COLLAPSED_WIDTH}px` : 
+                            0,
+                        transition: (theme) =>
+                            theme.transitions.create(['width', 'margin'], {
+                                easing: theme.transitions.easing.sharp,
+                                duration: theme.transitions.duration.standard,
+                            }),
+                        padding: 0,
+                        overflow: 'visible',
+                    }}
+                >
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/signin" element={<SignInPage />} />
+                        <Route path="/signup" element={<SignUpPage />} />
+                        <Route path="/transaction" element={<TransactionsPage />} />
+                        <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+                        <Route path="/budgets" element={<BudgetsPage />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </Box>
             </Box>
-        </Box>
+        </ThemeProvider>
     );
 }
 

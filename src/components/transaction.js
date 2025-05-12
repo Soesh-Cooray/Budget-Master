@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,Typography,Button,TextField,Select,Dialog,DialogTitle,DialogContent,DialogActions,ThemeProvider,
-  createTheme,Table,TableHead,TableBody,TableRow,TableCell,IconButton,FormControl,InputLabel,
-  MenuItem, styled, CircularProgress, Snackbar, Alert
+  Box, Typography, Button, TextField, Select, Dialog, DialogTitle, DialogContent, DialogActions,
+  Table, TableHead, TableBody, TableRow, TableCell, IconButton, FormControl, InputLabel,
+  MenuItem, styled, CircularProgress, Snackbar, Alert, useTheme
 } from '@mui/material';
 
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
@@ -10,28 +10,16 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useNavigate } from 'react-router-dom';
 import { transactionAPI, categoryAPI } from '../api';  // Import the API functions
 
-const theme = createTheme({
-  components: {
-    MuiTableCell: {
-      styleOverrides: {
-        head: {
-          fontWeight: 'bold',
-          fontSize: 16,
-        },
-      },
-    },
-  },
-});
-
 const HoverMenuItem = styled(MenuItem)(({ theme }) => ({
   borderRadius: 5,
   '&:hover': {
-    backgroundColor: '#16a34a',
-    color: '#f9fafb',
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(22, 163, 74, 0.2)' : '#16a34a',
+    color: theme.palette.mode === 'dark' ? '#fff' : '#f9fafb',
   },
 }));
 
 function TransactionsPage() {
+  const theme = useTheme();
   const navigate = useNavigate();
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [expenses, setExpenses] = useState([]);
@@ -265,266 +253,356 @@ function TransactionsPage() {
   }
   
   return (
-    <ThemeProvider theme={theme}>
-      <Box sx={{ backgroundColor: '#f0f7ff', padding: 2, minHeight: '100vh' }}>
-        {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-              Transactions
-            </Typography>
-            <Typography variant="body1">Manage your income and expenses</Typography>
-          </Box>
+    <Box sx={{ padding: 2, minHeight: '100vh', bgcolor: theme.palette.background.default }}>
+      {/* Header */}
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
+            Transactions
+          </Typography>
+          <Typography variant="body1" color="textSecondary">Manage your income and expenses</Typography>
         </Box>
+      </Box>
 
-        {/* Filters */}
-        <Box display="flex" alignItems="center" mb={2} justifyContent="space-between">
-          <Box display="flex" alignItems="center">
-            <TextField
-              label="Search transactions..."
-              size="small"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{ mr: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 },width: 200, }}
-            />
-            <Select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              size="small"
-              sx={{ mr: 1, borderRadius: 2 }}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    borderRadius: 2,
-                  },
+      {/* Filters */}
+      <Box display="flex" alignItems="center" mb={2} justifyContent="space-between">
+        <Box display="flex" alignItems="center">
+          <TextField
+            label="Search transactions..."
+            size="small"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            sx={{ 
+              mr: 1, 
+              '& .MuiOutlinedInput-root': { 
+                borderRadius: 2,
+                backgroundColor: theme.palette.background.paper,
+              },
+              width: 200,
+            }}
+          />
+          <Select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            size="small"
+            sx={{ 
+              mr: 1, 
+              borderRadius: 2,
+              backgroundColor: theme.palette.background.paper,
+            }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  borderRadius: 2,
+                  backgroundColor: theme.palette.background.paper,
                 },
-              }}  
-            >
-              <HoverMenuItem value="all">All Types</HoverMenuItem>
-              <HoverMenuItem value="income">Income</HoverMenuItem>
-              <HoverMenuItem value="expense">Expense</HoverMenuItem>
-            </Select>
-            <Select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              size="small"
-              sx={{ borderRadius: 2 }}
-              MenuProps={{
-                PaperProps: {
-                  style: {
-                    borderRadius: 2,
-                  },
+              },
+            }}  
+          >
+            <HoverMenuItem value="all">All Types</HoverMenuItem>
+            <HoverMenuItem value="income">Income</HoverMenuItem>
+            <HoverMenuItem value="expense">Expense</HoverMenuItem>
+          </Select>
+          <Select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            size="small"
+            sx={{ 
+              borderRadius: 2,
+              backgroundColor: theme.palette.background.paper,
+            }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  borderRadius: 2,
+                  backgroundColor: theme.palette.background.paper,
                 },
-              }}
-            > 
-              <HoverMenuItem value="all">All Categories</HoverMenuItem>
-              {allCategories.map((cat) => (
-                <HoverMenuItem key={cat.id} value={cat.id}>{cat.name}</HoverMenuItem>
-              ))}
-            </Select>
-          </Box>
+              },
+            }}
+          > 
+            <HoverMenuItem value="all">All Categories</HoverMenuItem>
+            {allCategories.map((cat) => (
+              <HoverMenuItem key={cat.id} value={cat.id}>{cat.name}</HoverMenuItem>
+            ))}
+          </Select>
+        </Box>
+        <Button 
+          variant="contained" 
+          sx={{ 
+            borderRadius: 2,
+            backgroundColor: theme.palette.primary.main,
+            '&:hover': {
+              backgroundColor: theme.palette.primary.dark,
+            },
+          }} 
+          onClick={handleOpenAddDialog}
+        >
+          + Add Transaction
+        </Button>
+      </Box>
+
+      {/* Transactions Table or Clean State */}
+      {filteredTransactions().length > 0 ? ( 
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#e0f7fa' }}>
+              <TableCell sx={{ color: theme.palette.text.primary }}>Description</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary }}>Date</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary }}>Category</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary }}>Type</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary }}>Amount</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary }}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredTransactions().map((transaction) => (
+              <TableRow key={transaction.id}>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{transaction.description}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{transaction.date}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary }}>{transaction.category_name || 'Unknown'}</TableCell>
+                <TableCell sx={{ color: theme.palette.text.primary }}>
+                  {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
+                </TableCell>
+                <TableCell
+                  sx={{
+                    color: transaction.transaction_type === 'income' 
+                      ? theme.palette.mode === 'dark' ? '#81c784' : 'green'
+                      : theme.palette.mode === 'dark' ? '#e57373' : 'red',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {transaction.transaction_type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
+                </TableCell>
+                <TableCell>
+                  <IconButton 
+                    onClick={() => handleEditTransaction(transaction)}
+                    sx={{ color: theme.palette.text.primary }}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => handleDeleteClick(transaction)}
+                    sx={{ color: theme.palette.mode === 'dark' ? '#e57373' : '#f44336' }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        // Clean state when no transactions are available
+        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh">
+          <MonetizationOnIcon sx={{ fontSize: 200, color: theme.palette.mode === 'dark' ? '#90caf9' : '#0EA9FF' }} />
+          <Typography variant="h6" gutterBottom sx={{ color: theme.palette.text.primary }}>
+            No transactions yet
+          </Typography>
+          <Typography variant="body2" gutterBottom color="textSecondary">
+            Start by adding your first transaction to track your income and expenses
+          </Typography>
+
           <Button 
             variant="contained" 
-            sx={{ borderRadius: 2 }} 
-            onClick={handleOpenAddDialog}
+            onClick={handleOpenAddDialog} 
+            sx={{ 
+              mt: 2, 
+              borderRadius: 2,
+              backgroundColor: theme.palette.primary.main,
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark,
+              },
+            }}
           >
             + Add Transaction
           </Button>
         </Box>
+      )}
 
-        {/* Transactions Table or Clean State */}
-        {filteredTransactions().length > 0 ? ( 
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: '#e0f7fa' }}>
-                <TableCell>Description</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Category</TableCell>
-                <TableCell>Type</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredTransactions().map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>{transaction.description}</TableCell>
-                  <TableCell>{transaction.date}</TableCell>
-                  <TableCell>{transaction.category_name || 'Unknown'}</TableCell>
-                  <TableCell>
-                    {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      color: transaction.transaction_type === 'income' ? 'green' : 'red',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {transaction.transaction_type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
-                  </TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleEditTransaction(transaction)}>
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteClick(transaction)}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+      {/* Add/Edit Transaction Dialog */}
+      <Dialog
+        open={openAddDialog}
+        onClose={handleCloseAddDialog}
+        PaperProps={{
+          style: {
+            borderRadius: 10,
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: theme.palette.text.primary }}>
+          {editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
+        </DialogTitle>
+        <DialogContent>
+          <TextField 
+            label="What was this transaction for" 
+            fullWidth 
+            margin="normal" 
+            value={description} 
+            onChange={(e) => setDescription(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: theme.palette.background.paper,
+              },
+            }}
+          />
+          <TextField 
+            fullWidth 
+            margin="normal" 
+            type="date" 
+            value={date} 
+            onChange={(e) => setDate(e.target.value)} 
+            InputLabelProps={{ shrink: true }}
+            label="Date"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: theme.palette.background.paper,
+              },
+            }}
+          />
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Type</InputLabel>
+            <Select 
+              value={type} 
+              onChange={(e) => setType(e.target.value)}
+              sx={{
+                backgroundColor: theme.palette.background.paper,
+              }}
+            >
+              <HoverMenuItem value="income">Income</HoverMenuItem>
+              <HoverMenuItem value="expense">Expense</HoverMenuItem>
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Select Category</InputLabel>
+            <Select 
+              value={category} 
+              onChange={(e) => setCategory(e.target.value)}
+              sx={{
+                backgroundColor: theme.palette.background.paper,
+              }}
+            >
+              {type === 'expense' && expenseCategories.map((cat) => (
+                <HoverMenuItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </HoverMenuItem>
               ))}
-            </TableBody>
-          </Table>
-        ) : (
-          // Clean state when no transactions are available
-          <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh">
-            <MonetizationOnIcon sx={{ fontSize: 200, color: '#0EA9FF' }} />
-            <Typography variant="h6" gutterBottom>
-              No transactions yet
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Start by adding your first transaction to track your income and expenses
-            </Typography>
-
-            {/* Add Transaction Button (Centered) */}
-            <Button variant="contained" onClick={handleOpenAddDialog} sx={{ mt: 2, borderRadius: 2 }}>
-              + Add Transaction
-            </Button>
-          </Box>
-        )}
-
-        {/* Add/Edit Transaction Dialog */}
-        <Dialog
-          open={openAddDialog}
-          onClose={handleCloseAddDialog}
-          PaperProps={{
-            style: {
-              borderRadius: 10,
-            },
-          }}
-        >
-          <DialogTitle>{editingTransaction ? 'Edit Transaction' : 'Add Transaction'}</DialogTitle>
-          <DialogContent>
-            <TextField 
-              label="What was this transaction for" 
-              fullWidth 
-              margin="normal" 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
-            />
-            <TextField 
-              fullWidth 
-              margin="normal" 
-              type="date" 
-              value={date} 
-              onChange={(e) => setDate(e.target.value)} 
-              InputLabelProps={{ shrink: true }}
-              label="Date"
-            />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Type</InputLabel>
-              <Select 
-                value={type} 
-                onChange={(e) => setType(e.target.value)}
-              >
-                <HoverMenuItem value="income">Income</HoverMenuItem>
-                <HoverMenuItem value="expense">Expense</HoverMenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Select Category</InputLabel>
-              <Select 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                {type === 'expense' && expenseCategories.map((cat) => (
-                  <HoverMenuItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </HoverMenuItem>
-                ))}
-                {type === 'income' && incomeCategories.map((cat) => (
-                  <HoverMenuItem key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </HoverMenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField 
-              label="Amount" 
-              fullWidth 
-              margin="normal" 
-              type="number" 
-              value={amount} 
-              onChange={(e) => setAmount(e.target.value)} 
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={handleCloseAddDialog}
-              sx={{ borderRadius: 4, '&:hover': { backgroundColor: '#FF0C0C', color: '#f9fafb' } }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="contained" 
-              onClick={handleAddTransaction}
-              sx={{ borderRadius: 4, '&:hover': { backgroundColor: '#16a34a', color: '#f9fafb' } }}
-            >
-              {editingTransaction ? 'Update' : 'Add'}
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Delete Confirmation Dialog */}
-        <Dialog
-          open={deleteConfirmOpen}
-          onClose={() => setDeleteConfirmOpen(false)}
-          PaperProps={{
-            style: {
-              borderRadius: 10,
-            },
-          }}
-        >
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <Typography>
-              Are you sure you want to delete this transaction? This action cannot be undone.
-            </Typography>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => setDeleteConfirmOpen(false)}
-              sx={{ borderRadius: 4 }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              variant="contained" 
-              color="error"
-              onClick={handleDeleteConfirm}
-              sx={{ borderRadius: 4 }}
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Snackbar for notifications */}
-        <Snackbar 
-          open={snackbar.open} 
-          autoHideDuration={6000} 
-          onClose={handleCloseSnackbar}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert 
-            onClose={handleCloseSnackbar} 
-            severity={snackbar.severity} 
-            sx={{ width: '100%' }}
+              {type === 'income' && incomeCategories.map((cat) => (
+                <HoverMenuItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </HoverMenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField 
+            label="Amount" 
+            fullWidth 
+            margin="normal" 
+            type="number" 
+            value={amount} 
+            onChange={(e) => setAmount(e.target.value)}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: theme.palette.background.paper,
+              },
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseAddDialog}
+            sx={{ 
+              borderRadius: 4,
+              color: theme.palette.text.primary,
+              '&:hover': { 
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 12, 12, 0.2)' : '#FF0C0C',
+                color: theme.palette.mode === 'dark' ? '#e57373' : '#f9fafb',
+              },
+            }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
-      </Box>
-    </ThemeProvider>
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            onClick={handleAddTransaction}
+            sx={{ 
+              borderRadius: 4,
+              backgroundColor: theme.palette.primary.main,
+              '&:hover': { 
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(22, 163, 74, 0.2)' : '#16a34a',
+                color: theme.palette.mode === 'dark' ? '#81c784' : '#f9fafb',
+              },
+            }}
+          >
+            {editingTransaction ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        PaperProps={{
+          style: {
+            borderRadius: 10,
+            backgroundColor: theme.palette.background.paper,
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: theme.palette.text.primary }}>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: theme.palette.text.primary }}>
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteConfirmOpen(false)}
+            sx={{ 
+              borderRadius: 4,
+              color: theme.palette.text.primary,
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            color="error"
+            onClick={handleDeleteConfirm}
+            sx={{ 
+              borderRadius: 4,
+              backgroundColor: theme.palette.error.main,
+              '&:hover': {
+                backgroundColor: theme.palette.error.dark,
+              },
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar 
+        open={snackbar.open} 
+        autoHideDuration={6000} 
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity} 
+          sx={{ 
+            width: '100%',
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+          }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
 
