@@ -76,6 +76,12 @@ const Reports = () => {
     categorySpendingOverTime: {
       labels: [],
       datasets: []
+    },
+    incomeBreakdown: {
+      labels: [],
+      values: [],
+      percentages: [],
+      colors: ['#00C853', '#FF3D00', '#7986cb', '#ff7043', '#4caf50', '#ff9800', '#2196f3']
     }
   });
 
@@ -104,6 +110,7 @@ const Reports = () => {
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
       const expenseBreakdown = processExpenseBreakdownData(expenses);
       const categorySpending = processCategorySpendingOverTime(expenses, months);
+      const incomeBreakdown = processIncomeBreakdownData(incomes);
 
       setFinancialData({
         totalIncome,
@@ -111,7 +118,8 @@ const Reports = () => {
         netBalance,
         incomeVsExpenses,
         expenseBreakdown,
-        categorySpendingOverTime: categorySpending
+        categorySpendingOverTime: categorySpending,
+        incomeBreakdown
       });
 
       setLoading(false);
@@ -213,6 +221,40 @@ const Reports = () => {
     return {
       labels: months,
       datasets
+    };
+  };
+
+  const processIncomeBreakdownData = (incomes) => {
+    const sourceTotals = {};
+    let totalIncome = 0;
+
+    // Calculate totals per source
+    incomes.forEach(income => {
+      // Use income.category_name for grouping, fallback to 'Uncategorized'
+      const source = income.category_name || 'Uncategorized';
+      const amount = parseFloat(income.amount);
+      sourceTotals[source] = (sourceTotals[source] || 0) + amount;
+      totalIncome += amount;
+    });
+
+    // Convert to arrays for chart
+    const labels = Object.keys(sourceTotals);
+    const values = Object.values(sourceTotals);
+    const percentages = values.map(value => ((value / totalIncome) * 100).toFixed(1));
+
+    // Log the processed data for debugging
+    console.log('Income Breakdown Data:', {
+      labels,
+      values,
+      percentages,
+      totalIncome
+    });
+
+    return {
+      labels,
+      values,
+      percentages,
+      colors: financialData.incomeBreakdown.colors.slice(0, labels.length)
     };
   };
 
@@ -463,6 +505,7 @@ const Reports = () => {
         >
           <Tab label="Overview" />
           <Tab label="Expenses" />
+          <Tab label="Income" />
           <Tab label="Trends" />
         </Tabs>
 
@@ -565,6 +608,34 @@ const Reports = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
+          <StyledCard>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Income Sources Breakdown
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Distribution of your income by source
+              </Typography>
+              <Box height={400} display="flex" justifyContent="center">
+                <Box width="70%" height="100%">
+                  <Pie 
+                    data={{
+                      labels: financialData.incomeBreakdown?.labels || [],
+                      datasets: [{
+                        data: financialData.incomeBreakdown?.values || [],
+                        backgroundColor: financialData.incomeBreakdown?.colors || [],
+                        borderWidth: 0,
+                      }],
+                    }} 
+                    options={pieOptions} 
+                  />
+                </Box>
+              </Box>
+            </CardContent>
+          </StyledCard>
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={3}>
           <StyledCard>
             <CardContent>
               <Typography variant="h6" gutterBottom>
