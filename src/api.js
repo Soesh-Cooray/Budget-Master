@@ -25,6 +25,7 @@ export const transactionAPI = {
   getAll: () => apiClient.get('transactions/'),
   getExpenses: () => apiClient.get('transactions/expenses/'),
   getIncomes: () => apiClient.get('transactions/income/'),
+  getSavings: () => apiClient.get('transactions/savings/'),
   create: (transactionData) => apiClient.post('transactions/', transactionData),
   update: (id, transactionData) => apiClient.put(`transactions/${id}/`, transactionData),
   delete: (id) => apiClient.delete(`transactions/${id}/`),

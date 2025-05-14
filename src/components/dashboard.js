@@ -96,6 +96,7 @@ const Dashboard = () => {
   const [financialData, setFinancialData] = useState({
     totalIncome: 0,
     totalExpenses: 0,
+    totalSavings: 0,
     currentBalance: 0,
     incomeVsExpenses: {
       labels: [],
@@ -113,6 +114,7 @@ const Dashboard = () => {
   const [recentBudgets, setRecentBudgets] = useState([]);
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [savings, setSavings] = useState([]);
 
   // Get username from JWT token
   let username = '';
@@ -141,24 +143,28 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [expensesRes, incomesRes, budgetsRes, categoriesRes] = await Promise.all([
+      const [expensesRes, incomesRes, savingsRes, budgetsRes, categoriesRes] = await Promise.all([
         transactionAPI.getExpenses(),
         transactionAPI.getIncomes(),
+        transactionAPI.getSavings(),
         budgetAPI.getAll(),
         categoryAPI.getExpenseCategories()
       ]);
 
       const expenses = expensesRes.data;
       const incomes = incomesRes.data;
+      const savingsTxns = savingsRes.data;
       const budgets = budgetsRes.data;
       const allTransactions = [...expenses, ...incomes].sort((a, b) => new Date(b.date) - new Date(a.date));
       setTransactions(allTransactions);
       setCategories(categoriesRes.data);
+      setSavings(savingsTxns);
 
       // Calculate totals
       const totalIncome = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
       const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-      const currentBalance = totalIncome - totalExpenses;
+      const totalSavings = savingsTxns.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
+      const currentBalance = totalIncome - totalExpenses - totalSavings;
 
       // Process data for charts
       const last6Months = getLast6Months();
@@ -168,6 +174,7 @@ const Dashboard = () => {
       setFinancialData({
         totalIncome,
         totalExpenses,
+        totalSavings,
         currentBalance,
         incomeVsExpenses,
         expenseBreakdown
@@ -358,7 +365,7 @@ const Dashboard = () => {
 
       {/* Stat Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <StatCard>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Current Balance</Typography>
@@ -368,7 +375,7 @@ const Dashboard = () => {
             <StatLabel>Total balance across all accounts</StatLabel>
           </StatCard>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <StatCard>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Total Income</Typography>
@@ -380,7 +387,7 @@ const Dashboard = () => {
             <StatLabel>Total income this period</StatLabel>
           </StatCard>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <StatCard>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Total Expenses</Typography>
@@ -390,6 +397,18 @@ const Dashboard = () => {
               ${financialData.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </StatValue>
             <StatLabel>Total expenses this period</StatLabel>
+          </StatCard>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <StatCard>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: 350, alignItems: 'center', mb: 1 }}>
+              <Typography variant="subtitle2" color="textSecondary">Total Savings</Typography>
+              <ArrowCircleUpIcon sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}/>
+            </Box>
+            <StatValue sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}>
+              ${financialData.totalSavings?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            </StatValue>
+            <StatLabel>Total savings this period</StatLabel>
           </StatCard>
         </Grid>
       </Grid>

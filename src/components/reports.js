@@ -58,9 +58,11 @@ const Reports = () => {
   const [timeRange, setTimeRange] = useState('6');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [savings, setSavings] = useState([]);
   const [financialData, setFinancialData] = useState({
     totalIncome: 0,
     totalExpenses: 0,
+    totalSavings: 0,
     netBalance: 0,
     incomeVsExpenses: {
       labels: [],
@@ -92,18 +94,20 @@ const Reports = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [expensesRes, incomesRes] = await Promise.all([
+      const [expensesRes, incomesRes, savingsRes] = await Promise.all([
         transactionAPI.getExpenses(),
-        transactionAPI.getIncomes()
+        transactionAPI.getIncomes(),
+        transactionAPI.getSavings()
       ]);
-
       const expenses = expensesRes.data;
       const incomes = incomesRes.data;
-
+      const savingsTxns = savingsRes.data;
+      setSavings(savingsTxns);
       // Calculate totals
       const totalIncome = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
       const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-      const netBalance = totalIncome - totalExpenses;
+      const totalSavings = savingsTxns.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
+      const netBalance = totalIncome - totalExpenses - totalSavings;
 
       // Process data for charts
       const months = getMonthsForTimeRange();
@@ -115,6 +119,7 @@ const Reports = () => {
       setFinancialData({
         totalIncome,
         totalExpenses,
+        totalSavings,
         netBalance,
         incomeVsExpenses,
         expenseBreakdown,
@@ -448,7 +453,7 @@ const Reports = () => {
       </Box>
 
       <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <StyledCard>
             <Card sx={{ height: 150, width: 330, padding: 2,}}>
               <Box>
@@ -462,7 +467,7 @@ const Reports = () => {
             </Card>
           </StyledCard>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
           <StyledCard>
             <Card sx={{ height: 150, width: 330, padding: 2,}}>
               <Box>
@@ -476,7 +481,21 @@ const Reports = () => {
             </Card>
           </StyledCard>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={3}>
+          <StyledCard>
+            <Card sx={{ height: 150, width: 330, padding: 2,}}>
+              <Box>
+                <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+                  Total Savings
+                </Typography>
+                <AmountTypography color="balance">
+                  ${financialData.totalSavings?.toLocaleString()}
+                </AmountTypography>
+              </Box>
+            </Card>
+          </StyledCard>
+        </Grid>
+        <Grid item xs={12} md={3}>
           <StyledCard>
             <Card sx={{ height: 150, width: 330, padding: 2,}}>
               <Box>

@@ -24,9 +24,11 @@ function TransactionsPage() {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
+  const [savings, setSavings] = useState([]);
   const [allCategories, setAllCategories] = useState([]);
   const [expenseCategories, setExpenseCategories] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState([]);
+  const [savingsCategories, setSavingsCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all');
@@ -59,25 +61,30 @@ function TransactionsPage() {
       setCategory(''); // Reset selected category
     } else if (type === 'income') {
       setCategory(''); // Reset selected category
+    } else if (type === 'savings') {
+      setCategory(''); // Reset selected category
     }
   }, [type]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [expensesRes, incomesRes, categoriesRes] = await Promise.all([
+      const [expensesRes, incomesRes, savingsRes, categoriesRes] = await Promise.all([
         transactionAPI.getExpenses(),
         transactionAPI.getIncomes(),
+        transactionAPI.getSavings(),
         categoryAPI.getAll()
       ]);
       
       setExpenses(expensesRes.data);
       setIncomes(incomesRes.data);
+      setSavings(savingsRes.data);
       setAllCategories(categoriesRes.data);
       
       // Separate categories by type
       setExpenseCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'expense'));
       setIncomeCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'income'));
+      setSavingsCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'savings'));
       
       setLoading(false);
     } catch (err) {
@@ -212,7 +219,7 @@ function TransactionsPage() {
 
   // Filter transactions based on search term, type filter, and category filter
   const filteredTransactions = () => {
-    let transactions = [...expenses, ...incomes];
+    let transactions = [...expenses, ...incomes, ...savings];
     
     // Apply search filter
     if (searchTerm) {
@@ -302,6 +309,7 @@ function TransactionsPage() {
             <HoverMenuItem value="all">All Types</HoverMenuItem>
             <HoverMenuItem value="income">Income</HoverMenuItem>
             <HoverMenuItem value="expense">Expense</HoverMenuItem>
+            <HoverMenuItem value="savings">Savings</HoverMenuItem>
           </Select>
           <Select
             value={filterCategory}
@@ -361,17 +369,19 @@ function TransactionsPage() {
                 <TableCell sx={{ color: theme.palette.text.primary }}>{transaction.date}</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary }}>{transaction.category_name || 'Unknown'}</TableCell>
                 <TableCell sx={{ color: theme.palette.text.primary }}>
-                  {transaction.transaction_type === 'income' ? 'Income' : 'Expense'}
+                  {transaction.transaction_type === 'income' ? 'Income' : transaction.transaction_type === 'expense' ? 'Expense' : 'Savings'}
                 </TableCell>
                 <TableCell
                   sx={{
-                    color: transaction.transaction_type === 'income' 
+                    color: transaction.transaction_type === 'income'
                       ? theme.palette.mode === 'dark' ? '#81c784' : 'green'
-                      : theme.palette.mode === 'dark' ? '#e57373' : 'red',
+                      : transaction.transaction_type === 'expense'
+                        ? theme.palette.mode === 'dark' ? '#e57373' : 'red'
+                        : theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab',
                     fontWeight: 'bold',
                   }}
                 >
-                  {transaction.transaction_type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
+                  {transaction.transaction_type === 'income' ? '+' : transaction.transaction_type === 'expense' ? '-' : ''}${parseFloat(transaction.amount).toFixed(2)}
                 </TableCell>
                 <TableCell>
                   <IconButton 
@@ -471,6 +481,7 @@ function TransactionsPage() {
             >
               <HoverMenuItem value="income">Income</HoverMenuItem>
               <HoverMenuItem value="expense">Expense</HoverMenuItem>
+              <HoverMenuItem value="savings">Savings</HoverMenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth margin="normal">
@@ -488,6 +499,11 @@ function TransactionsPage() {
                 </HoverMenuItem>
               ))}
               {type === 'income' && incomeCategories.map((cat) => (
+                <HoverMenuItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </HoverMenuItem>
+              ))}
+              {type === 'savings' && savingsCategories.map((cat) => (
                 <HoverMenuItem key={cat.id} value={cat.id}>
                   {cat.name}
                 </HoverMenuItem>
