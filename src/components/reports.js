@@ -31,7 +31,15 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 const AmountTypography = styled(Typography)(({ theme, color }) => ({
   fontWeight: 'bold',
-  color: color === 'income' ? '#00C853' : color === 'expense' ? '#FF3D00' : '#1E88E5',
+  color: color === 'income' 
+    ? '#00C853' 
+    : color === 'expense' 
+    ? '#FF3D00' 
+    : color === 'savings' 
+    ? '#191CFF' 
+    : color === 'balance' 
+    ? theme.palette.mode === 'dark' ? '#ffffff' : '#000000'
+    : '#1E88E5',
   fontSize: '2rem',
   marginTop: theme.spacing(1),
 }));
@@ -492,7 +500,7 @@ const Reports = () => {
                 <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                   Total Savings
                 </Typography>
-                <AmountTypography color="balance">
+                <AmountTypography color="savings">
                   {currencySymbol}{financialData.totalSavings?.toLocaleString()}
                 </AmountTypography>
               </Box>
