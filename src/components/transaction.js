@@ -137,6 +137,15 @@ function TransactionsPage() {
       });
       return;
     }
+    // Prevent future dates
+    if (new Date(date) > new Date()) {
+      setSnackbar({
+        open: true,
+        message: 'Date cannot be in the future',
+        severity: 'error'
+      });
+      return;
+    }
 
     try {
       const transactionData = {
@@ -471,6 +480,7 @@ function TransactionsPage() {
             onChange={(e) => setDate(e.target.value)} 
             InputLabelProps={{ shrink: true }}
             label="Date"
+            inputProps={{ max: new Date().toISOString().split('T')[0] }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 backgroundColor: theme.palette.background.paper,
