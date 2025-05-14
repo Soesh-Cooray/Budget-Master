@@ -1,34 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  Grid, 
-  Container,
-  Paper,
-  Tabs,
-  Tab,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress
+import { Box, Typography, Card,CardContent, Grid, Container,Paper,Tabs,Tab,Select,MenuItem,FormControl,InputLabel,CircularProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import {Chart as ChartJS,CategoryScale,LinearScale,PointElement,LineElement,BarElement,ArcElement,Title,Tooltip,Legend,} from 'chart.js';
 import { transactionAPI } from '../api';
 
 // Register ChartJS components

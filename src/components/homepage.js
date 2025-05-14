@@ -24,7 +24,7 @@ function HomePage() {
           </Grid>
           <Grid item>
             <Box>
-              <Button component={Link} to="/signin" sx={{ marginRight: 1 }}>Login</Button>
+              <Button component={Link} to="/signin" sx={{ marginRight: 1 ,'&:hover': {backgroundColor: '#4caf50',color: 'white'}}}>Login</Button>
               <Button variant="contained" sx={{ backgroundColor: 'blue', color: 'white' }} component={Link} to="/signup">
                 Sign Up
               </Button>
@@ -50,7 +50,14 @@ function HomePage() {
             <Button variant="contained" sx={{ marginRight: 1, marginTop: 2 }} component={Link} to="/signup">
               Get Started →
             </Button>
-            <Button component={Link} to="/signin" sx={{ marginTop: 2 }}>Login</Button>
+            <Button 
+              component={Link} to="/signin" 
+              sx={{ 
+                marginTop: 2,'&:hover': {backgroundColor: '#4caf50',color: 'white'}
+            }}
+            >
+            Login
+            </Button>
           </Grid>
           <Grid item xs={12} md={8}>
             <Card sx={{ padding: 2, borderRadius: 4, width: '80%', height: '200px', marginLeft: 20, marginTop: 15 }} elevation={10}>
