@@ -442,7 +442,18 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
 }
 
 const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining, percent, onEdit, onDelete }) => (
-    <Card sx={{ p: 3, borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.05)', mb: 2, minWidth: 320 }}>
+    <Card sx={{ 
+        p: 3, 
+        borderRadius: 3, 
+        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+        mb: 2, 
+        minWidth: 320,
+        transition: 'all 0.3s ease-in-out',
+        '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 12px 32px rgba(0,0,0,0.18)'
+        }
+    }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{name}</Typography>
             <Box>
