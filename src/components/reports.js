@@ -4,7 +4,7 @@ import { Box, Typography, Card,CardContent, Grid, Container,Paper,Tabs,Tab,Selec
 import { styled } from '@mui/material/styles';
 import { Line, Bar, Pie, Doughnut } from 'react-chartjs-2';
 import {Chart as ChartJS,CategoryScale,LinearScale,PointElement,LineElement,BarElement,ArcElement,Title,Tooltip,Legend,} from 'chart.js';
-import { transactionAPI } from '../api';
+import { transactionAPI, getCurrencySymbol } from '../api';
 
 // Register ChartJS components
 ChartJS.register(
@@ -86,9 +86,13 @@ const Reports = () => {
       colors: ['#00C853', '#FF3D00', '#7986cb', '#ff7043', '#4caf50', '#ff9800', '#2196f3']
     }
   });
+  const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
 
   useEffect(() => {
     fetchData();
+    const updateCurrency = () => setCurrencySymbol(getCurrencySymbol());
+    window.addEventListener('currencyChange', updateCurrency);
+    return () => window.removeEventListener('currencyChange', updateCurrency);
   }, [timeRange]);
 
   const fetchData = async () => {
@@ -461,7 +465,7 @@ const Reports = () => {
                   Total Income
                 </Typography>
                 <AmountTypography color="income">
-                  ${financialData.totalIncome.toLocaleString()}
+                  {currencySymbol}{financialData.totalIncome.toLocaleString()}
                 </AmountTypography>
               </Box>
             </Card>
@@ -475,7 +479,7 @@ const Reports = () => {
                   Total Expenses
                 </Typography>
                 <AmountTypography color="expense">
-                  ${financialData.totalExpenses.toLocaleString()}
+                  {currencySymbol}{financialData.totalExpenses.toLocaleString()}
                 </AmountTypography>
               </Box>
             </Card>
@@ -489,7 +493,7 @@ const Reports = () => {
                   Total Savings
                 </Typography>
                 <AmountTypography color="balance">
-                  ${financialData.totalSavings?.toLocaleString()}
+                  {currencySymbol}{financialData.totalSavings?.toLocaleString()}
                 </AmountTypography>
               </Box>
             </Card>
@@ -503,7 +507,7 @@ const Reports = () => {
                   Net Balance
                 </Typography>
                 <AmountTypography color="balance">
-                  ${financialData.netBalance.toLocaleString()}
+                  {currencySymbol}{financialData.netBalance.toLocaleString()}
                 </AmountTypography>
               </Box>
             </Card>

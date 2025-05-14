@@ -6,7 +6,7 @@ import { Chart as ChartJS, CategoryScale,LinearScale,BarElement,ArcElement,Title
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
-import { transactionAPI, budgetAPI, categoryAPI } from '../api';
+import { transactionAPI, budgetAPI, categoryAPI, getCurrencySymbol } from '../api';
 import { jwtDecode } from 'jwt-decode';
 
 // Register the chart components
@@ -115,6 +115,7 @@ const Dashboard = () => {
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [savings, setSavings] = useState([]);
+  const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
 
   // Get username from JWT token
   let username = '';
@@ -138,6 +139,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
+    const updateCurrency = () => setCurrencySymbol(getCurrencySymbol());
+    window.addEventListener('currencyChange', updateCurrency);
+    return () => window.removeEventListener('currencyChange', updateCurrency);
   }, []);
 
   const fetchData = async () => {
@@ -371,7 +375,7 @@ const Dashboard = () => {
               <Typography variant="subtitle2" color="textSecondary">Current Balance</Typography>
               <AccountBalanceWalletIcon sx={{ color: theme.palette.mode === 'dark' ? '#90caf9' : '#39C8CC' }}/>
             </Box>
-            <StatValue>${financialData.currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</StatValue>
+            <StatValue>{currencySymbol}{financialData.currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</StatValue>
             <StatLabel>Total balance across all accounts</StatLabel>
           </StatCard>
         </Grid>
@@ -382,7 +386,7 @@ const Dashboard = () => {
               <ArrowCircleUpIcon sx={{ color: theme.palette.mode === 'dark' ? '#81c784' : '#2eb432' }}/>
             </Box>
             <StatValue sx={{ color: theme.palette.mode === 'dark' ? '#81c784' : '#4caf50' }}>
-              ${financialData.totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {currencySymbol}{financialData.totalIncome.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </StatValue>
             <StatLabel>Total income this period</StatLabel>
           </StatCard>
@@ -394,7 +398,7 @@ const Dashboard = () => {
               <ArrowCircleDownIcon sx={{ color: theme.palette.mode === 'dark' ? '#e57373' : '#f44336' }}/>
             </Box>
             <StatValue sx={{ color: theme.palette.mode === 'dark' ? '#e57373' : '#f44336' }}>
-              ${financialData.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {currencySymbol}{financialData.totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </StatValue>
             <StatLabel>Total expenses this period</StatLabel>
           </StatCard>
@@ -406,7 +410,7 @@ const Dashboard = () => {
               <ArrowCircleUpIcon sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}/>
             </Box>
             <StatValue sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}>
-              ${financialData.totalSavings?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              {currencySymbol}{financialData.totalSavings?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
             </StatValue>
             <StatLabel>Total savings this period</StatLabel>
           </StatCard>
@@ -576,7 +580,7 @@ const Dashboard = () => {
                       : theme.palette.mode === 'dark' ? '#e57373' : '#f44336'
                   }}
                 >
-                  {transaction.transaction_type === 'income' ? '+' : '-'}${parseFloat(transaction.amount).toFixed(2)}
+                  {transaction.transaction_type === 'income' ? '+' : '-'}{currencySymbol}{parseFloat(transaction.amount).toFixed(2)}
                 </Typography>
               </Box>
             </ListItem>

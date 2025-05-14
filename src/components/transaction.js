@@ -8,7 +8,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useNavigate } from 'react-router-dom';
-import { transactionAPI, categoryAPI } from '../api';  // Import the API functions
+import { transactionAPI, categoryAPI, getCurrencySymbol } from '../api';  // Import the API functions
 
 const HoverMenuItem = styled(MenuItem)(({ theme }) => ({
   borderRadius: 5,
@@ -49,6 +49,7 @@ function TransactionsPage() {
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
 
   // Fetch data on component mount
   useEffect(() => {
@@ -65,6 +66,12 @@ function TransactionsPage() {
       setCategory(''); // Reset selected category
     }
   }, [type]);
+
+  useEffect(() => {
+    const updateCurrency = () => setCurrencySymbol(getCurrencySymbol());
+    window.addEventListener('currencyChange', updateCurrency);
+    return () => window.removeEventListener('currencyChange', updateCurrency);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -381,7 +388,7 @@ function TransactionsPage() {
                     fontWeight: 'bold',
                   }}
                 >
-                  {transaction.transaction_type === 'income' ? '+' : transaction.transaction_type === 'expense' ? '-' : ''}${parseFloat(transaction.amount).toFixed(2)}
+                  {transaction.transaction_type === 'income' ? '+' : transaction.transaction_type === 'expense' ? '-' : ''}{currencySymbol}{parseFloat(transaction.amount).toFixed(2)}
                 </TableCell>
                 <TableCell>
                   <IconButton 

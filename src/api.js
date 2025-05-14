@@ -49,6 +49,21 @@ export const budgetAPI = {
   delete: (id) => apiClient.delete(`budgets/${id}/`),
 };
 
+// Utility to get currency symbol
+export function getCurrencySymbol() {
+  const currency = localStorage.getItem('currency') || 'USD';
+  switch (currency) {
+    case 'USD': return '$';
+    case 'EUR': return '€';
+    case 'INR': return '₹';
+    case 'GBP': return '£';
+    case 'JPY': return '¥';
+    case 'CAD': return 'C$';
+    case 'AUD': return 'A$';
+    default: return '$';
+  }
+}
+
 export default {
   transaction: transactionAPI,
   category: categoryAPI,
