@@ -27,7 +27,6 @@ const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: theme.spacing(1),
   boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.05)',
   padding: theme.spacing(2),
-  backgroundColor: '#f5f8ff', // Light blue background
 }));
 
 const AmountTypography = styled(Typography)(({ theme, color }) => ({
@@ -409,7 +408,7 @@ const Reports = () => {
       <Grid container spacing={3} mb={4}>
         <Grid item xs={12} md={4}>
           <StyledCard>
-            <Card sx={{ height: 150, width: 330, padding: 2, backgroundColor: '#f5f8ff' }}>
+            <Card sx={{ height: 150, width: 330, padding: 2,}}>
               <Box>
                 <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                   Total Income
@@ -423,7 +422,7 @@ const Reports = () => {
         </Grid>
         <Grid item xs={12} md={4}>
           <StyledCard>
-            <Card sx={{ height: 150, width: 330, padding: 2, backgroundColor: '#f5f8ff' }}>
+            <Card sx={{ height: 150, width: 330, padding: 2,}}>
               <Box>
                 <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                   Total Expenses
@@ -437,7 +436,7 @@ const Reports = () => {
         </Grid>
         <Grid item xs={12} md={4}>
           <StyledCard>
-            <Card sx={{ height: 150, width: 330, padding: 2, backgroundColor: '#f5f8ff' }}>
+            <Card sx={{ height: 150, width: 330, padding: 2,}}>
               <Box>
                 <Typography variant="subtitle1" color="text.secondary" gutterBottom>
                   Net Balance
@@ -453,7 +452,6 @@ const Reports = () => {
 
       <Paper sx={{ 
         mb: 4, 
-        backgroundColor: '#f5f8ff',
         borderRadius: 4
       }}>
         <Tabs 
@@ -472,7 +470,7 @@ const Reports = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <StyledCard>
-                <Card sx={{ height: 500, width: 500, backgroundColor: '#f5f8ff' }}>
+                <Card sx={{ height: 500, width: 500, }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
                       Income vs Expenses
@@ -508,7 +506,7 @@ const Reports = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <StyledCard>
-                <Card sx={{ height: 500, width: 550, backgroundColor: '#f5f8ff' }}>
+                <Card sx={{ height: 500, width: 550 }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
                       Expense Breakdown
