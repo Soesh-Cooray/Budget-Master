@@ -412,7 +412,7 @@ const Reports = () => {
         callbacks: {
           title: (context) => context[0].label,
           label: (context) => {
-            return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
+            return `${context.dataset.label}: ${currencySymbol}${context.parsed.y.toLocaleString()}`;
           },
         },
       },
