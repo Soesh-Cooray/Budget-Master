@@ -477,10 +477,46 @@ const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining,
             <Typography sx={{ fontWeight: 500 }}>{currencySymbol}{spent.toFixed(2)}</Typography>
             <Typography sx={{ fontWeight: 500 }}>of {currencySymbol}{Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
         </Box>
-        <LinearProgress variant="determinate" value={percent} sx={{ height: 8, borderRadius: 4, backgroundColor: '#f5f5f5', mb: 1 }} />
+        <LinearProgress
+            variant="determinate"
+            value={percent}
+            sx={{
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: '#f5f5f5',
+                mb: 1,
+                '& .MuiLinearProgress-bar': {
+                    backgroundColor:
+                        percent > 100
+                            ? '#b71c1c'      // dark red
+                            : percent > 80
+                                ? '#f44336'  // red
+                                : percent > 60
+                                    ? '#ff9800' // orange/warning
+                                    : '#4caf50', // green
+                },
+            }}
+        />
         <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" color="textSecondary">Remaining: {currencySymbol}{Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
-            <Typography variant="body2" color="textSecondary">{percent.toFixed(0)}%</Typography>
+            <Typography variant="body2" color="textSecondary">
+                Remaining: {currencySymbol}{Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </Typography>
+            <Typography
+                variant="body2"
+                color="textSecondary"
+                sx={{
+                    color:
+                        percent > 100
+                            ? '#b71c1c'
+                            : percent > 80
+                                ? '#f44336'
+                                : percent > 60
+                                    ? '#ff9800'
+                                    : undefined
+                }}
+            >
+                {percent.toFixed(0)}%
+            </Typography>
         </Box>
     </Card>
 );
