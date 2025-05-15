@@ -303,7 +303,7 @@ const Reports = () => {
       },
       tooltip: {
         callbacks: {
-          label: (context) => `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`,
+          label: (context) => `${context.dataset.label}: ${currencySymbol}${context.parsed.y.toLocaleString()}`,
         },
       },
     },
@@ -342,7 +342,7 @@ const Reports = () => {
             const value = context.parsed || 0;
             const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
             const percentage = Math.round((value / total) * 100);
-            return `${label}: ${percentage}%`;
+            return `${label}: ${percentage}% (${currencySymbol}${value.toLocaleString()})`;
           },
         },
       },
@@ -376,7 +376,7 @@ const Reports = () => {
             const value = context.parsed || 0;
             const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
             const percentage = Math.round((value / total) * 100);
-            return `${label}: ${percentage}%`;
+            return `${label}: ${percentage}% (${currencySymbol}${value.toLocaleString()})`;
           },
         },
       },

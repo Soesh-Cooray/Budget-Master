@@ -369,7 +369,7 @@ function TransactionsPage() {
       {filteredTransactions().length > 0 ? ( 
         <Table>
           <TableHead>
-            <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#e0f7fa' }}>
+            <TableRow sx={{ backgroundColor: theme.palette.mode === 'dark' ? 'rgba(126, 125, 124, 0.29)' : '#e0f7fa' }}>
               <TableCell sx={{ color: theme.palette.text.primary }}>Description</TableCell>
               <TableCell sx={{ color: theme.palette.text.primary }}>Date</TableCell>
               <TableCell sx={{ color: theme.palette.text.primary }}>Category</TableCell>
