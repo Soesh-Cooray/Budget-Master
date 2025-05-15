@@ -55,7 +55,7 @@ const BudgetProgressBar = styled(LinearProgress)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#f5f5f5',
 }));
 
-const BudgetProgressCard = ({ name, spent, amount, remaining, percent }) => {
+const BudgetProgressCard = ({ name, spent, amount, remaining, percent, currencySymbol }) => {
   const theme = useTheme();
   return (
     <Card sx={{ 
@@ -68,8 +68,8 @@ const BudgetProgressCard = ({ name, spent, amount, remaining, percent }) => {
     }}>
       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: theme.palette.text.primary }}>{name}</Typography>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-        <Typography sx={{ fontWeight: 500, color: theme.palette.text.primary }}>${spent.toFixed(2)}</Typography>
-        <Typography sx={{ fontWeight: 500, color: theme.palette.text.primary }}>of ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+        <Typography sx={{ fontWeight: 500, color: theme.palette.text.primary }}>{currencySymbol}{spent.toFixed(2)}</Typography>
+        <Typography sx={{ fontWeight: 500, color: theme.palette.text.primary }}>of {currencySymbol}{Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
       </Box>
       <LinearProgress 
         variant="determinate" 
@@ -82,7 +82,7 @@ const BudgetProgressCard = ({ name, spent, amount, remaining, percent }) => {
         }} 
       />
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="body2" color="textSecondary">Remaining: ${Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+        <Typography variant="body2" color="textSecondary">Remaining: {currencySymbol}{Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
         <Typography variant="body2" color="textSecondary">{percent.toFixed(0)}%</Typography>
       </Box>
     </Card>
@@ -604,6 +604,7 @@ const Dashboard = () => {
                 amount={budget.amount}
                 remaining={remaining}
                 percent={percent}
+                currencySymbol={currencySymbol}
               />
             </Grid>
           );

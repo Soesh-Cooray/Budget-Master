@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
 import SavingsIcon from '@mui/icons-material/Savings';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { categoryAPI, budgetAPI, transactionAPI } from '../api';
+import { categoryAPI, budgetAPI, transactionAPI,getCurrencySymbol } from '../api';
 
 function BudgetsPage() {
     const [budgets, setBudgets] = useState([]);
@@ -16,6 +16,7 @@ function BudgetsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAddBudgetDialogOpen, setIsAddBudgetDialogOpen] = useState(false);
+    const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
     const [snackbar, setSnackbar] = useState({
         open: false,
         message: '',
@@ -25,6 +26,9 @@ function BudgetsPage() {
 
     useEffect(() => {
         fetchBudgetsCategoriesTransactions();
+        const updateCurrency = () => setCurrencySymbol(getCurrencySymbol());
+        window.addEventListener('currencyChange', updateCurrency);
+        return () => window.removeEventListener('currencyChange', updateCurrency);
     }, []);
 
     const fetchBudgetsCategoriesTransactions = async () => {
@@ -195,6 +199,7 @@ function BudgetsPage() {
                                 percent={percent}
                                 onEdit={() => handleEditBudget(budget.id, budget)}
                                 onDelete={() => handleDeleteBudget(budget.id)}
+                                currencySymbol={currencySymbol}
                             />
                         </Grid>
                     );
@@ -441,7 +446,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
     );
 }
 
-const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining, percent, onEdit, onDelete }) => (
+const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining, percent, onEdit, onDelete, currencySymbol }) => (
     <Card sx={{ 
         p: 3, 
         borderRadius: 3, 
@@ -469,12 +474,12 @@ const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining,
             <Typography variant="body2">Started {new Date(startDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</Typography>
         </Box>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-            <Typography sx={{ fontWeight: 500 }}>${spent.toFixed(2)}</Typography>
-            <Typography sx={{ fontWeight: 500 }}>of ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+            <Typography sx={{ fontWeight: 500 }}>{currencySymbol}{spent.toFixed(2)}</Typography>
+            <Typography sx={{ fontWeight: 500 }}>of {currencySymbol}{Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
         </Box>
         <LinearProgress variant="determinate" value={percent} sx={{ height: 8, borderRadius: 4, backgroundColor: '#f5f5f5', mb: 1 }} />
         <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="body2" color="textSecondary">Remaining: ${Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+            <Typography variant="body2" color="textSecondary">Remaining: {currencySymbol}{Number(remaining).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
             <Typography variant="body2" color="textSecondary">{percent.toFixed(0)}%</Typography>
         </Box>
     </Card>
