@@ -131,7 +131,7 @@ const Reports = () => {
       const months = getMonthsForTimeRange();
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
       const expenseBreakdown = processExpenseBreakdownData(expenses);
-      const categorySpending = processAllCategorySpendingOverTime(expenses, incomes, savingsTxns, months);
+      const categorySpending = processGroupedTrendsData(expenses, incomes, savingsTxns, months);
       const incomeBreakdown = processIncomeBreakdownData(incomes);
       const savingsBreakdown = processSavingsBreakdownData(savingsTxns);
 
@@ -221,60 +221,42 @@ const Reports = () => {
     };
   };
 
-  const processAllCategorySpendingOverTime = (expenses, incomes, savings, months) => {
-    // Helper to get unique categories for each type
-    const getCategories = (arr, key = 'category_name') =>
-      [...new Set(arr.map(item => item[key] || 'Uncategorized'))];
-
-    const expenseCategories = getCategories(expenses);
-    const incomeCategories = getCategories(incomes);
-    const savingsCategories = getCategories(savings);
-
-    // Colors
-    const expenseColors = financialData.expenseBreakdown.colors;
-    const incomeColors = financialData.incomeBreakdown.colors;
-    const savingsColors = financialData.savingsBreakdown.colors;
-
-    // Build datasets for each type
-    const datasets = [
-      ...expenseCategories.map((category, idx) => ({
-        label: `Expense: ${category}`,
-        data: months.map((month) =>
-          expenses
-            .filter(e => (e.category_name || 'Uncategorized') === category &&
-                         new Date(e.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
-            .reduce((sum, e) => sum + parseFloat(e.amount), 0)
-        ),
-        backgroundColor: expenseColors[idx % expenseColors.length],
-        stack: 'Expenses',
-      })),
-      ...incomeCategories.map((category, idx) => ({
-        label: `Income: ${category}`,
-        data: months.map((month) =>
-          incomes
-            .filter(i => (i.category_name || 'Uncategorized') === category &&
-                         new Date(i.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
-            .reduce((sum, i) => sum + parseFloat(i.amount), 0)
-        ),
-        backgroundColor: incomeColors[idx % incomeColors.length],
-        stack: 'Income',
-      })),
-      ...savingsCategories.map((category, idx) => ({
-        label: `Savings: ${category}`,
-        data: months.map((month) =>
-          savings
-            .filter(s => (s.category_name || 'Uncategorized') === category &&
-                         new Date(s.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
-            .reduce((sum, s) => sum + parseFloat(s.amount), 0)
-        ),
-        backgroundColor: savingsColors[idx % savingsColors.length],
-        stack: 'Savings',
-      })),
-    ];
+  const processGroupedTrendsData = (expenses, incomes, savings, months) => {
+    const expenseData = months.map(month =>
+      expenses
+        .filter(e => new Date(e.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+        .reduce((sum, e) => sum + parseFloat(e.amount), 0)
+    );
+    const incomeData = months.map(month =>
+      incomes
+        .filter(i => new Date(i.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+        .reduce((sum, i) => sum + parseFloat(i.amount), 0)
+    );
+    const savingsData = months.map(month =>
+      savings
+        .filter(s => new Date(s.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+        .reduce((sum, s) => sum + parseFloat(s.amount), 0)
+    );
 
     return {
       labels: months,
-      datasets,
+      datasets: [
+        {
+          label: 'Expenses',
+          data: expenseData,
+          backgroundColor: '#FF3D00',
+        },
+        {
+          label: 'Income',
+          data: incomeData,
+          backgroundColor: '#00C853',
+        },
+        {
+          label: 'Savings',
+          data: savingsData,
+          backgroundColor: '#1c96c5',
+        },
+      ],
     };
   };
 
