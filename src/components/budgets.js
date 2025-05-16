@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container,Typography,Card,Grid,LinearProgress,Box,IconButton,Dialog,DialogTitle,DialogContent,TextField,Select,
-    MenuItem,Button,FormControl,InputLabel,Paper,CircularProgress,Snackbar,Alert} from '@mui/material';
+    MenuItem,Button,FormControl,InputLabel,Paper,CircularProgress,Snackbar,Alert, useTheme} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
@@ -254,6 +254,8 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
     const [isAddingCustomCategory, setIsAddingCustomCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [error, setError] = useState('');
+    const [newCategoryType, setNewCategoryType] = useState('expense');
+    const theme = useTheme();
 
     useEffect(() => {
         if (editingBudget) {
@@ -267,7 +269,8 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
             setPeriod('monthly');
             setStartDate(new Date().toLocaleDateString('en-CA').split('/').reverse().join('-'));
         }
-    }, [editingBudget, categories]);
+        setNewCategoryType('expense');
+    }, [editingBudget, categories, open]);
 
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
@@ -290,15 +293,14 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
             setError('Category name is required');
             return;
         }
-
         try {
             await categoryAPI.create({
                 name: newCategoryName,
-                transaction_type: 'expense'
+                transaction_type: newCategoryType
             });
-            
             setNewCategoryName('');
             setIsAddingCustomCategory(false);
+            setNewCategoryType('expense');
             onAddCustomCategory(); // Refresh categories
             setError('');
         } catch (err) {
@@ -363,16 +365,66 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
                                 </Box>
                             </>
                         ) : (
-                            <Box>
-                                <TextField
-                                    fullWidth
-                                    label="New Category Name"
-                                    value={newCategoryName}
-                                    onChange={(e) => setNewCategoryName(e.target.value)}
-                                    error={!!error}
-                                    helperText={error}
-                                />
-                                <Box mt={1} display="flex" gap={1}>
+                            <Paper elevation={3} 
+                                sx={{ 
+                                    p: 2, mt: 1, mb: 2, borderRadius: 2, 
+                                    background: theme.palette.background.paper, 
+                                    color: theme.palette.text.primary,
+                                    boxShadow: theme.palette.mode === 'dark' ? '0 2px 12px rgba(0,0,0,0.7)' : undefined,
+                                    border: theme.palette.mode === 'dark' ? '1px solid #333' : '1px solid #e0e0e0',
+                                }}>
+                                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500, color: theme.palette.text.primary }}>
+                                    Add Custom Category
+                                </Typography>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} sm={7}>
+                                        <TextField
+                                            fullWidth
+                                            label="New Category Name"
+                                            value={newCategoryName}
+                                            onChange={(e) => setNewCategoryName(e.target.value)}
+                                            error={!!error}
+                                            helperText={error}
+                                            sx={{ 
+                                                background: theme.palette.background.default, 
+                                                borderRadius: 1,
+                                                input: { color: theme.palette.text.primary },
+                                                label: { color: theme.palette.text.primary },
+                                            }}
+                                            InputLabelProps={{ style: { color: theme.palette.text.primary, opacity: 0.8 } }}
+                                            InputProps={{ style: { color: theme.palette.text.primary } }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} sm={5}>
+                                        <FormControl fullWidth>
+                                            <InputLabel id="new-category-type-label" sx={{ color: theme.palette.text.primary }}>Type</InputLabel>
+                                            <Select
+                                                labelId="new-category-type-label"
+                                                value={newCategoryType}
+                                                label="Type"
+                                                onChange={e => setNewCategoryType(e.target.value)}
+                                                sx={{ 
+                                                    background: theme.palette.background.default, 
+                                                    borderRadius: 1,
+                                                    color: theme.palette.text.primary,
+                                                }}
+                                                MenuProps={{
+                                                    PaperProps: {
+                                                        style: {
+                                                            backgroundColor: theme.palette.background.paper,
+                                                            color: theme.palette.text.primary,
+                                                        },
+                                                    },
+                                                }}
+                                            >
+                                                <MenuItem value="expense">Expense</MenuItem>
+                                                <MenuItem value="income">Income</MenuItem>
+                                                <MenuItem value="savings">Savings</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                </Grid>
+                                <Box mt={2} display="flex" gap={1}>
                                     <Button 
                                         size="small" 
                                         onClick={handleAddCustomCategory}
@@ -385,13 +437,14 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
                                         onClick={() => {
                                             setIsAddingCustomCategory(false);
                                             setNewCategoryName('');
+                                            setNewCategoryType('expense');
                                             setError('');
                                         }}
                                     >
                                         Cancel
                                     </Button>
                                 </Box>
-                            </Box>
+                            </Paper>
                         )}
                     </Grid>
                     <Grid item xs={12} sm={6}>

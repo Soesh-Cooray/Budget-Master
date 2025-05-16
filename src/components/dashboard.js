@@ -377,7 +377,7 @@ const Dashboard = () => {
           <StatCard>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Current Balance</Typography>
-              <AccountBalanceWalletIcon sx={{ color: theme.palette.mode === 'dark' ? '#90caf9' : '#39C8CC' }}/>
+              <AccountBalanceWalletIcon sx={{ color: theme.palette.mode === 'dark' ? '#F7FDFF' : '#000000' }}/>
             </Box>
             <StatValue>{currencySymbol}{financialData.currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}</StatValue>
             <StatLabel>Total balance across all accounts</StatLabel>

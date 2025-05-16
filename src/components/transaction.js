@@ -255,6 +255,9 @@ function TransactionsPage() {
       transactions = transactions.filter(t => t.category === parseInt(filterCategory));
     }
     
+    // Sort transactions by date in descending order (latest to oldest)
+    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
     return transactions;
   };
 
