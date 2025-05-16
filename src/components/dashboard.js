@@ -6,6 +6,7 @@ import { Chart as ChartJS, CategoryScale,LinearScale,BarElement,ArcElement,Title
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
+import SavingsSharpIcon from '@mui/icons-material/SavingsSharp';
 import { transactionAPI, budgetAPI, categoryAPI, getCurrencySymbol } from '../api';
 import { jwtDecode } from 'jwt-decode';
 
@@ -407,7 +408,7 @@ const Dashboard = () => {
           <StatCard>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', width: 350, alignItems: 'center', mb: 1 }}>
               <Typography variant="subtitle2" color="textSecondary">Total Savings</Typography>
-              <ArrowCircleUpIcon sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}/>
+              <SavingsSharpIcon sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}/>
             </Box>
             <StatValue sx={{ color: theme.palette.mode === 'dark' ? '#7986cb' : '#3949ab' }}>
               {currencySymbol}{financialData.totalSavings?.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -419,11 +420,11 @@ const Dashboard = () => {
 
       {/* Charts */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <StyledPaper>
+        <Grid item xs={12} sm={6} md={6}>
+          <StyledPaper sx={{ width: '100%' }}>
             <Typography variant="h6" sx={{ mb: 0.5, color: theme.palette.text.primary }}>Income vs Expenses</Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>Your financial balance over time</Typography>
-            <Box sx={{ height: 400, width: 400 }}>
+            <Box sx={{ height: 400, width: '100%' }}>
               <Bar 
                 data={{
                   labels: financialData.incomeVsExpenses.labels,
@@ -479,11 +480,11 @@ const Dashboard = () => {
             </Box>
           </StyledPaper>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <StyledPaper>
+        <Grid item xs={12} sm={6} md={6}>
+          <StyledPaper sx={{ width: '100%' }}>
             <Typography variant="h6" sx={{ mb: 0.5, color: theme.palette.text.primary }}>Expense Breakdown</Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>Your spending by category</Typography>
-            <Box sx={{ height: 300, width: 670, display: 'flex', justifyContent: 'center', position: 'relative' }}>
+            <Box sx={{ height: 400, width: '100%', display: 'flex', justifyContent: 'center', mx: 'auto' }}>
               <Doughnut 
                 data={{
                   labels: financialData.expenseBreakdown.labels,
@@ -509,19 +510,18 @@ const Dashboard = () => {
                   },
                 }} 
               />
-              
-              {/* Legends for the doughnut chart */}
-              <Box sx={{ position: 'absolute', top: 350, width: '100%', display: 'flex', justifyContent: 'center', mt: 4, pb: 2 }}>
-                <Box sx={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center'}}>
-                  {financialData.expenseBreakdown.labels.map((label, index) => (
-                    <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: financialData.expenseBreakdown.colors[index] }} />
-                      <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-                        {label} {financialData.expenseBreakdown.percentages[index]}%
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
+            </Box>
+            {/* Legends for the doughnut chart - below the chart, inside the same Grid item */}
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 2, pb: 2 }}>
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center'}}>
+                {financialData.expenseBreakdown.labels.map((label, index) => (
+                  <Box key={label} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: financialData.expenseBreakdown.colors[index] }} />
+                    <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+                      {label} {financialData.expenseBreakdown.percentages[index]}%
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
             </Box>
           </StyledPaper>
