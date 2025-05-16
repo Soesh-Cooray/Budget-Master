@@ -120,13 +120,16 @@ const Dashboard = () => {
 
   // Get username from JWT token
   let username = '';
+  let firstName = '';
   const token = localStorage.getItem('accessToken');
   if (token) {
     try {
       const decoded = jwtDecode(token);
+      firstName = decoded.first_name || '';
       username = decoded.username || decoded.user || decoded.email || '';
     } catch (e) {
       username = '';
+      firstName = '';
     }
   }
 
@@ -362,7 +365,7 @@ const Dashboard = () => {
   return (
     <Box sx={{ p: 3, minHeight: '100vh', bgcolor: theme.palette.background.default }}>
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5, color: theme.palette.text.primary }}>
-        {username ? `${getGreeting()}, ${username}` : getGreeting()}
+        {firstName ? `${getGreeting()}, ${firstName}` : (username ? `${getGreeting()}, ${username}` : getGreeting())}
       </Typography>
       <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
         Here's an overview of your finances
