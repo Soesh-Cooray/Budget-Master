@@ -81,7 +81,7 @@ const Reports = () => {
       labels: [],
       values: [],
       percentages: [],
-      colors: ['#990000', '#ff0000', '#ff8700', '#ffa500', '#ffce00', '#ffe700', '#f0ff00']
+      colors: ['#ff6767', '#ff7878', '#ff8989', '#ffaaaa', '#ffcfcf', '#ffe3e3', '#ffeeee']
     },
     categorySpendingOverTime: {
       labels: [],
@@ -91,7 +91,7 @@ const Reports = () => {
       labels: [],
       values: [],
       percentages: [],
-      colors: ['#b7ff00', '#7eff00', '#46c34c', '#479f78', '#cfffb1', '#3ec995', '#77f07f']
+      colors: ['#47894b', '#5ea758', '#8bbd78', '#98c377', '#7be382']
     }
   });
   const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
