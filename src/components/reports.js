@@ -92,6 +92,12 @@ const Reports = () => {
       values: [],
       percentages: [],
       colors: ['#47894b', '#5ea758', '#8bbd78', '#98c377', '#7be382']
+    },
+    savingsBreakdown: {
+      labels: [],
+      values: [],
+      percentages: [],
+      colors: ['#1c96c5', '#20a7db', '#62c1e5', '#a0d9ef', '#cfecf7', '#d2ebff']
     }
   });
   const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
@@ -125,8 +131,9 @@ const Reports = () => {
       const months = getMonthsForTimeRange();
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
       const expenseBreakdown = processExpenseBreakdownData(expenses);
-      const categorySpending = processCategorySpendingOverTime(expenses, months);
+      const categorySpending = processAllCategorySpendingOverTime(expenses, incomes, savingsTxns, months);
       const incomeBreakdown = processIncomeBreakdownData(incomes);
+      const savingsBreakdown = processSavingsBreakdownData(savingsTxns);
 
       setFinancialData({
         totalIncome,
@@ -136,7 +143,8 @@ const Reports = () => {
         incomeVsExpenses,
         expenseBreakdown,
         categorySpendingOverTime: categorySpending,
-        incomeBreakdown
+        incomeBreakdown,
+        savingsBreakdown
       });
 
       setLoading(false);
@@ -213,31 +221,60 @@ const Reports = () => {
     };
   };
 
-  const processCategorySpendingOverTime = (expenses, months) => {
-    const categories = [...new Set(expenses.map(expense => expense.category_name || 'Uncategorized'))];
-    const datasets = categories.map((category, index) => {
-      const data = new Array(months.length).fill(0);
-      
-      expenses
-        .filter(expense => (expense.category_name || 'Uncategorized') === category)
-        .forEach(expense => {
-          const date = new Date(expense.date);
-          const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
-          if (monthIndex !== -1) {
-            data[monthIndex] += parseFloat(expense.amount);
-          }
-        });
+  const processAllCategorySpendingOverTime = (expenses, incomes, savings, months) => {
+    // Helper to get unique categories for each type
+    const getCategories = (arr, key = 'category_name') =>
+      [...new Set(arr.map(item => item[key] || 'Uncategorized'))];
 
-      return {
-        label: category,
-        data,
-        backgroundColor: financialData.expenseBreakdown.colors[index % financialData.expenseBreakdown.colors.length]
-      };
-    });
+    const expenseCategories = getCategories(expenses);
+    const incomeCategories = getCategories(incomes);
+    const savingsCategories = getCategories(savings);
+
+    // Colors
+    const expenseColors = financialData.expenseBreakdown.colors;
+    const incomeColors = financialData.incomeBreakdown.colors;
+    const savingsColors = financialData.savingsBreakdown.colors;
+
+    // Build datasets for each type
+    const datasets = [
+      ...expenseCategories.map((category, idx) => ({
+        label: `Expense: ${category}`,
+        data: months.map((month) =>
+          expenses
+            .filter(e => (e.category_name || 'Uncategorized') === category &&
+                         new Date(e.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+            .reduce((sum, e) => sum + parseFloat(e.amount), 0)
+        ),
+        backgroundColor: expenseColors[idx % expenseColors.length],
+        stack: 'Expenses',
+      })),
+      ...incomeCategories.map((category, idx) => ({
+        label: `Income: ${category}`,
+        data: months.map((month) =>
+          incomes
+            .filter(i => (i.category_name || 'Uncategorized') === category &&
+                         new Date(i.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+            .reduce((sum, i) => sum + parseFloat(i.amount), 0)
+        ),
+        backgroundColor: incomeColors[idx % incomeColors.length],
+        stack: 'Income',
+      })),
+      ...savingsCategories.map((category, idx) => ({
+        label: `Savings: ${category}`,
+        data: months.map((month) =>
+          savings
+            .filter(s => (s.category_name || 'Uncategorized') === category &&
+                         new Date(s.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+            .reduce((sum, s) => sum + parseFloat(s.amount), 0)
+        ),
+        backgroundColor: savingsColors[idx % savingsColors.length],
+        stack: 'Savings',
+      })),
+    ];
 
     return {
       labels: months,
-      datasets
+      datasets,
     };
   };
 
@@ -272,6 +309,31 @@ const Reports = () => {
       values,
       percentages,
       colors: financialData.incomeBreakdown.colors.slice(0, labels.length)
+    };
+  };
+
+  const processSavingsBreakdownData = (savings) => {
+    const categoryTotals = {};
+    let totalSavings = 0;
+
+    // Calculate totals per category
+    savings.forEach(saving => {
+      const category = saving.category_name || 'Uncategorized';
+      const amount = parseFloat(saving.amount);
+      categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+      totalSavings += amount;
+    });
+
+    // Convert to arrays for chart
+    const labels = Object.keys(categoryTotals);
+    const values = Object.values(categoryTotals);
+    const percentages = values.map(value => ((value / totalSavings) * 100).toFixed(1));
+
+    return {
+      labels,
+      values,
+      percentages,
+      colors: financialData.savingsBreakdown.colors.slice(0, labels.length)
     };
   };
 
@@ -537,6 +599,7 @@ const Reports = () => {
           <Tab label="Overview" />
           <Tab label="Expenses" />
           <Tab label="Income" />
+          <Tab label="Savings" />
           <Tab label="Trends" />
         </Tabs>
 
@@ -670,12 +733,57 @@ const Reports = () => {
           <StyledCard>
             <CardContent>
               <Typography variant="h6" gutterBottom>
+                Savings Breakdown
+              </Typography>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Distribution of your savings by category
+              </Typography>
+              <Box height={400} display="flex" justifyContent="center">
+                <Box width="70%" height="100%">
+                  <Pie 
+                    data={{
+                      labels: financialData.savingsBreakdown.labels,
+                      datasets: [{
+                        data: financialData.savingsBreakdown.values,
+                        backgroundColor: financialData.savingsBreakdown.colors,
+                        borderWidth: 0,
+                      }],
+                    }} 
+                    options={{
+                      ...pieOptions,
+                      plugins: {
+                        ...pieOptions.plugins,
+                        tooltip: {
+                          callbacks: {
+                            label: (context) => {
+                              const label = context.label || '';
+                              const value = context.parsed || 0;
+                              const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                              const percentage = Math.round((value / total) * 100);
+                              return `${label}: ${percentage}% (${currencySymbol}${value.toLocaleString()})`;
+                            },
+                          },
+                        },
+                      },
+                    }} 
+                  />
+                </Box>
+              </Box>
+            </CardContent>
+          </StyledCard>
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={4}>
+          <StyledCard>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
                 Category Spending Over Time
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 Track how your spending in top categories changes over time
               </Typography>
               <Box height={400}>
+                {console.log('Trends Bar Data:', financialData.categorySpendingOverTime)}
                 <Bar 
                   data={financialData.categorySpendingOverTime}
                   options={categorySpendingOptions} 
