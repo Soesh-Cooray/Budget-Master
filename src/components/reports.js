@@ -777,10 +777,10 @@ const Reports = () => {
           <StyledCard>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                Category Spending Over Time
+                Income Vs Expenses Vs Savings Over Time
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Track how your spending in top categories changes over time
+                Track how your spending, income & savings change over time
               </Typography>
               <Box height={400}>
                 {console.log('Trends Bar Data:', financialData.categorySpendingOverTime)}
