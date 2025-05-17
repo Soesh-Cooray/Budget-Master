@@ -780,7 +780,7 @@ const Reports = () => {
                 Income Vs Expenses Vs Savings Over Time
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                Track how your spending, income & savings change over time
+                Track how your spending, income & savings changegit over time
               </Typography>
               <Box height={400}>
                 {console.log('Trends Bar Data:', financialData.categorySpendingOverTime)}
