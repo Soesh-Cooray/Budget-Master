@@ -1,0 +1,1 @@
+# Djoser is used for user registration and authentication. No custom views needed here.
