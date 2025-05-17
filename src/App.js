@@ -6,6 +6,7 @@ import SignInPage from './components/signin';
 import SignUpPage from './components/signup';
 import TransactionsPage from './components/transaction';
 import ForgotPasswordPage from './components/forgotpasswordpage';
+import ResetPasswordConfirmPage from './components/resetpasswordconfirmpage';
 import BudgetsPage from './components/budgets';
 import Dashboard from './components/dashboard';
 import Reports from './components/reports';
@@ -94,6 +95,8 @@ function App() {
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/transaction" element={<TransactionsPage />} />
                         <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+                        {/* Update the reset password route to match Djoser's URL structure */}
+                        <Route path="/reset-password-confirm" element={<ResetPasswordConfirmPage />} />
                         <Route path="/budgets" element={<BudgetsPage />} />
                         <Route path="/reports" element={<Reports />} />
                         <Route path="/dashboard" element={<Dashboard />} />
