@@ -53,12 +53,13 @@ INSTALLED_APPS = [
 
 SITE_ID = 1  # Add this, often 1
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'budgetmaster2025@gmail.com'  # Add your Gmail address here
-EMAIL_HOST_PASSWORD = 'mrlo pfps uaog pcjo'  # Add your Gmail app password here
+EMAIL_HOST_USER = 'budgetmaster2025@gmail.com'
+EMAIL_HOST_PASSWORD = 'mrlo pfps uaog pcjo'  # Your Gmail App Password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 REST_FRAMEWORK = {
@@ -82,24 +83,28 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
+    'TOKEN_OBTAIN_SERIALIZER': 'accounts.tokens.MyTokenObtainPairSerializer',
 }
 
+# Djoser Email Settings
 DJOSER = {
     'USER_ID_FIELD': 'id',
-    'PASSWORD_RESET_CONFIRM_URL': 'password/reset/confirm/{uid}/{token}',
+    # Changed to match the React route
+    'PASSWORD_RESET_CONFIRM_URL': 'reset-password-confirm?uid={uid}&token={token}',  
     'USERNAME_RESET_CONFIRM_URL': 'username/reset/confirm/{uid}/{token}',
     'ACTIVATION_URL': 'activate/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_ACTIVATION_EMAIL': False,
+    'ACTIVATION': False,
     'SEND_CONFIRMATION_EMAIL': True,
     'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
-    'SERIALIZERS': {},
-    'EMAIL': {
-        'password_reset': 'djoser.email.PasswordResetEmail',
-        'password_changed_confirmation': 'djoser.email.PasswordChangedConfirmationEmail',
-    },
+    'SERIALIZERS': {
+        'user_create': 'accounts.serializers.UserCreateSerializer',
+        'user': 'accounts.serializers.UserCreateSerializer', 
+    }
 }
 
+print('DJOSER SETTINGS:', DJOSER)
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',

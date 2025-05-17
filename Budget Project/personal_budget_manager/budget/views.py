@@ -30,6 +30,12 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(categories, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def savings_categories(self, request):
+        categories = self.get_queryset().filter(transaction_type=TransactionType.SAVINGS)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data)
+
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -50,6 +56,12 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def income(self, request):
         income = self.get_queryset().filter(transaction_type=TransactionType.INCOME)
         serializer = self.get_serializer(income, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def savings(self, request):
+        savings = self.get_queryset().filter(transaction_type=TransactionType.SAVINGS)
+        serializer = self.get_serializer(savings, many=True)
         return Response(serializer.data)
 
 class BudgetViewSet(viewsets.ModelViewSet):

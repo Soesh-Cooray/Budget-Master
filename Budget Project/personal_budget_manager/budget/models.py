@@ -7,6 +7,7 @@ from django.dispatch import receiver
 class TransactionType(models.TextChoices):
     EXPENSE = 'expense', 'Expense'
     INCOME = 'income', 'Income'
+    SAVINGS = 'savings', 'Savings'
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
@@ -66,6 +67,10 @@ def create_default_categories(sender, **kwargs):
             'Salary', 'Freelance', 'Investment', 'Other'
         ]
         
+        default_savings_categories = [
+            'Emergency Fund', 'Retirement', 'Vacation', 'Other'
+        ]
+        
         # Create default expense categories
         for category_name in default_expense_categories:
             Category.objects.get_or_create(
@@ -82,4 +87,13 @@ def create_default_categories(sender, **kwargs):
                 transaction_type=TransactionType.INCOME,
                 is_default=True,
                 user=None  # None indicates it's a system default category
+            )
+        
+        # Create default savings categories
+        for category_name in default_savings_categories:
+            Category.objects.get_or_create(
+                name=category_name,
+                transaction_type=TransactionType.SAVINGS,
+                is_default=True,
+                user=None
             )
