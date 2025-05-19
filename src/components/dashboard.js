@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, LinearProgress, List, ListItem, ListItemText, Chip, Avatar, CircularProgress, Card, useTheme } from '@mui/material';
+import { Box, Typography, Paper, Grid, LinearProgress, List, ListItem, ListItemText, Chip, Avatar, CircularProgress, Card, useTheme, TextField, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale,LinearScale,BarElement,ArcElement,Title,Tooltip,Legend } from 'chart.js';
@@ -7,8 +7,12 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import SavingsSharpIcon from '@mui/icons-material/SavingsSharp';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { transactionAPI, budgetAPI, categoryAPI, getCurrencySymbol } from '../api';
 import { jwtDecode } from 'jwt-decode';
+import { format, subDays } from 'date-fns';
 
 // Register the chart components
 ChartJS.register(
@@ -94,6 +98,14 @@ const Dashboard = () => {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [startDate, setStartDate] = useState(() => {
+    const savedStartDate = localStorage.getItem('dashboardStartDate');
+    return savedStartDate ? new Date(savedStartDate) : subDays(new Date(), 30);
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const savedEndDate = localStorage.getItem('dashboardEndDate');
+    return savedEndDate ? new Date(savedEndDate) : new Date();
+  });
   const [financialData, setFinancialData] = useState({
     totalIncome: 0,
     totalExpenses: 0,
@@ -140,21 +152,33 @@ const Dashboard = () => {
     if (hour < 18) return 'Good Afternoon';
     return 'Good Evening';
   };
+  // Handle date changes
+  const handleStartDateChange = (newValue) => {
+    setStartDate(newValue);
+    localStorage.setItem('dashboardStartDate', newValue.toISOString());
+  };
+
+  const handleEndDateChange = (newValue) => {
+    setEndDate(newValue);
+    localStorage.setItem('dashboardEndDate', newValue.toISOString());
+  };
 
   useEffect(() => {
     fetchData();
     const updateCurrency = () => setCurrencySymbol(getCurrencySymbol());
     window.addEventListener('currencyChange', updateCurrency);
     return () => window.removeEventListener('currencyChange', updateCurrency);
-  }, []);
-
+  }, [startDate, endDate]);
   const fetchData = async () => {
     try {
       setLoading(true);
+      const formattedStartDate = formatDateForApi(startDate);
+      const formattedEndDate = formatDateForApi(endDate);
+      
       const [expensesRes, incomesRes, savingsRes, budgetsRes, categoriesRes] = await Promise.all([
-        transactionAPI.getExpenses(),
-        transactionAPI.getIncomes(),
-        transactionAPI.getSavings(),
+        transactionAPI.getExpenses(formattedStartDate, formattedEndDate),
+        transactionAPI.getIncomes(formattedStartDate, formattedEndDate),
+        transactionAPI.getSavings(formattedStartDate, formattedEndDate),
         budgetAPI.getAll(),
         categoryAPI.getExpenseCategories()
       ]);
@@ -172,11 +196,9 @@ const Dashboard = () => {
       const totalIncome = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
       const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
       const totalSavings = savingsTxns.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
-      const currentBalance = totalIncome - totalExpenses - totalSavings;
-
-      // Process data for charts
-      const last6Months = getLast6Months();
-      const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, last6Months);
+      const currentBalance = totalIncome - totalExpenses - totalSavings;      // Process data for charts
+      const monthsInRange = getMonthsInRange();
+      const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, monthsInRange);
       const expenseBreakdown = processExpenseBreakdownData(expenses);
 
       setFinancialData({
@@ -204,13 +226,12 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  const getLast6Months = () => {
+  const getMonthsInRange = () => {
     const months = [];
-    const today = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      months.push(date.toLocaleString('default', { month: 'short' }));
+    const currentDate = new Date(startDate);
+    while (currentDate <= endDate) {
+      months.push(format(currentDate, 'MMM'));
+      currentDate.setMonth(currentDate.getMonth() + 1);
     }
     return months;
   };
@@ -346,6 +367,50 @@ const Dashboard = () => {
       .reduce((sum, txn) => sum + parseFloat(txn.amount), 0);
   };
 
+  // Format date for API
+  const formatDateForApi = (date) => {
+    return format(date, 'yyyy-MM-dd');
+  };
+
+  // Filtered data based on date range
+  const filteredTransactions = transactions.filter(txn => {
+    const txnDate = new Date(txn.date);
+    return txnDate >= startDate && txnDate <= endDate;
+  });
+
+  const filteredIncomeVsExpenses = {
+    labels: financialData.incomeVsExpenses.labels,
+    income: financialData.incomeVsExpenses.income.filter((_, index) => {
+      const monthStart = new Date();
+      monthStart.setMonth(monthStart.getMonth() - index);
+      return monthStart >= startDate;
+    }),
+    expenses: financialData.incomeVsExpenses.expenses.filter((_, index) => {
+      const monthStart = new Date();
+      monthStart.setMonth(monthStart.getMonth() - index);
+      return monthStart >= startDate;
+    }),
+  };
+
+  const filteredExpenseBreakdown = {
+    labels: financialData.expenseBreakdown.labels,
+    values: financialData.expenseBreakdown.values.filter((_, index) => {
+      const category = financialData.expenseBreakdown.labels[index];
+      const spentInCategory = calculateSpent({ category, start_date: startDate, end_date: endDate });
+      return spentInCategory > 0;
+    }),
+    percentages: financialData.expenseBreakdown.percentages.filter((_, index) => {
+      const category = financialData.expenseBreakdown.labels[index];
+      const spentInCategory = calculateSpent({ category, start_date: startDate, end_date: endDate });
+      return spentInCategory > 0;
+    }),
+    colors: financialData.expenseBreakdown.colors.filter((_, index) => {
+      const category = financialData.expenseBreakdown.labels[index];
+      const spentInCategory = calculateSpent({ category, start_date: startDate, end_date: endDate });
+      return spentInCategory > 0;
+    }),
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
@@ -367,9 +432,63 @@ const Dashboard = () => {
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 0.5, color: theme.palette.text.primary }}>
         {firstName ? `${getGreeting()}, ${firstName}` : (username ? `${getGreeting()}, ${username}` : getGreeting())}
       </Typography>
-      <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+      <Typography variant="body1" color="textSecondary" sx={{ mb: 2 }}>
         Here's an overview of your finances
       </Typography>
+
+      {/* Date Range Picker */}
+      <Paper 
+        elevation={0} 
+        sx={{ 
+          mb: 4,
+          p: 3,
+          borderRadius: 2,
+          backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+          border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}`,
+        }}
+      >
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' }, 
+            gap: 2, 
+            alignItems: { xs: 'stretch', sm: 'center' },
+            '& .MuiTextField-root': { 
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: 1,
+              width: { xs: '100%', sm: '200px' }
+            }
+          }}>
+            <DatePicker
+              label="From Date"
+              value={startDate}
+              onChange={handleStartDateChange}
+              renderInput={(params) => <TextField {...params} fullWidth />}
+            />
+            <DatePicker
+              label="To Date"              value={endDate}
+              onChange={handleEndDateChange}
+              renderInput={(params) => <TextField {...params} fullWidth />}
+            />
+            <Button 
+              variant="contained" 
+              onClick={fetchData}
+              sx={{ 
+                height: 53,
+                px: 4,
+                width: { xs: '100%', sm: 'auto' },
+                bgcolor: theme.palette.primary.main,
+                '&:hover': {
+                  bgcolor: theme.palette.primary.dark,
+                },
+                boxShadow: 'none'
+              }}
+            >
+              Update
+            </Button>
+          </Box>
+        </LocalizationProvider>
+      </Paper>
 
       {/* Stat Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

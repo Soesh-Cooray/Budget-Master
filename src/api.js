@@ -23,9 +23,15 @@ apiClient.interceptors.request.use(
 // Transaction API
 export const transactionAPI = {
   getAll: () => apiClient.get('transactions/'),
-  getExpenses: () => apiClient.get('transactions/expenses/'),
-  getIncomes: () => apiClient.get('transactions/income/'),
-  getSavings: () => apiClient.get('transactions/savings/'),
+  getExpenses: (startDate, endDate) => apiClient.get('transactions/expenses/', {
+    params: { start_date: startDate, end_date: endDate }
+  }),
+  getIncomes: (startDate, endDate) => apiClient.get('transactions/income/', {
+    params: { start_date: startDate, end_date: endDate }
+  }),
+  getSavings: (startDate, endDate) => apiClient.get('transactions/savings/', {
+    params: { start_date: startDate, end_date: endDate }
+  }),
   create: (transactionData) => apiClient.post('transactions/', transactionData),
   update: (id, transactionData) => apiClient.put(`transactions/${id}/`, transactionData),
   delete: (id) => apiClient.delete(`transactions/${id}/`),
