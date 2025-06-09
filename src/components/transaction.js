@@ -99,7 +99,7 @@ function TransactionsPage() {
       setError('Failed to load data. Please try again.');
       setLoading(false);
       
-      // If unauthorized, redirect to login
+      
       if (err.response && err.response.status === 401) {
         handleLogout();
       }
@@ -174,7 +174,7 @@ function TransactionsPage() {
         });
       }
       
-      // Close dialog and refresh data
+      
       handleCloseAddDialog();
       fetchData();
     } catch (err) {

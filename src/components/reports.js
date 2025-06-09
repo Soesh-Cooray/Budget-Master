@@ -371,23 +371,6 @@ const Reports = () => {
     },
   };
 
-  const incomeExpenseChartData = {
-    labels: financialData.incomeVsExpenses.labels,
-    datasets: [
-      {
-        label: 'Income',
-        data: financialData.incomeVsExpenses.income,
-        backgroundColor: '#00C853',
-        barThickness: 20,
-      },
-      {
-        label: 'Expenses',
-        data: financialData.incomeVsExpenses.expenses,
-        backgroundColor: '#FF3D00',
-        barThickness: 20,
-      },
-    ],
-  };
 
   const doughnutOptions = {
     responsive: true,
@@ -412,16 +395,7 @@ const Reports = () => {
     cutout: '70%',
   };
 
-  const expenseBreakdownData = {
-    labels: financialData.expenseBreakdown.labels,
-    datasets: [
-      {
-        data: financialData.expenseBreakdown.values,
-        backgroundColor: financialData.expenseBreakdown.colors,
-        borderWidth: 0,
-      },
-    ],
-  };
+  
 
   const pieOptions = {
     responsive: true,

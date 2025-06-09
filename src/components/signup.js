@@ -32,16 +32,16 @@ function SignUpPage() {
             return "Password must contain at least one numerical character.";
         }
 
-        return ""; // Password is valid
+        return ""; 
     };
 
     const handleSignUp = async () => {
         const passwordErrorMessage = validatePassword(password);
         setPasswordError(passwordErrorMessage);
-        setConfirmPasswordError(""); // Clear any previous confirm password error
+        setConfirmPasswordError(""); 
 
         if (passwordErrorMessage) {
-            return; // Stop signup if password is invalid
+            return; 
         }
 
         if (password !== confirmPassword) {

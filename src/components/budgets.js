@@ -75,7 +75,7 @@ function BudgetsPage() {
                 start_date: newBudget.startDate
             };
             if (editingBudget) {
-                // Update existing budget
+                
                 const res = await budgetAPI.update(editingBudget.id, payload);
                 setBudgets(budgets.map(b => b.id === editingBudget.id ? res.data : b));
                 setSnackbar({
@@ -84,7 +84,7 @@ function BudgetsPage() {
                     severity: 'success'
                 });
             } else {
-                // Create new budget
+                
                 const res = await budgetAPI.create(payload);
                 setBudgets([...budgets, res.data]);
                 setSnackbar({
@@ -540,13 +540,13 @@ const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining,
                 mb: 1,
                 '& .MuiLinearProgress-bar': {
                     backgroundColor:
-                        percent > 100
-                            ? '#b71c1c'      // dark red
-                            : percent > 80
-                                ? '#f44336'  // red
-                                : percent > 60
-                                    ? '#ff9800' // orange/warning
-                                    : '#4caf50', // green
+                     percent > 100
+                        ? '#b71c1c'      
+                        : percent > 80
+                            ? '#f44336'  
+                            : percent > 60
+                                ? '#ff9800' 
+                                : '#4caf50', 
                 },
             }}
         />
@@ -560,12 +560,12 @@ const BudgetProgressCard = ({ name, period, startDate, spent, amount, remaining,
                 sx={{
                     color:
                         percent > 100
-                            ? '#b71c1c'
+                        ? '#b71c1c'
                             : percent > 80
-                                ? '#f44336'
+                            ? '#f44336'
                                 : percent > 60
-                                    ? '#ff9800'
-                                    : undefined
+                                ? '#ff9800'
+                                : undefined
                 }}
             >
                 {percent.toFixed(0)}%
