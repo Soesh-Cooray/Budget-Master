@@ -143,13 +143,14 @@ const Reports = () => {
       const totalSavings = filteredSavings.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
       const netBalance = totalIncome - totalExpenses - totalSavings;
 
-      // Process data for charts (use all data, as before)
+      // Process data for charts
       const months = getMonthsForTimeRange();
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
-      const expenseBreakdown = processExpenseBreakdownData(expenses);
+      // Use filtered data for breakdowns so charts reflect time range
+      const expenseBreakdown = processExpenseBreakdownData(filteredExpenses);
+      const incomeBreakdown = processIncomeBreakdownData(filteredIncomes);
+      const savingsBreakdown = processSavingsBreakdownData(filteredSavings);
       const categorySpending = processAllCategorySpendingOverTime(expenses, incomes, savingsTxns, months);
-      const incomeBreakdown = processIncomeBreakdownData(incomes);
-      const savingsBreakdown = processSavingsBreakdownData(savingsTxns);
 
       setFinancialData({
         totalIncome,
