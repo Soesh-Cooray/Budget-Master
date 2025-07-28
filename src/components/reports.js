@@ -109,6 +109,18 @@ const Reports = () => {
     return () => window.removeEventListener('currencyChange', updateCurrency);
   }, [timeRange]);
 
+  // Helper to filter transactions by selected time range
+  const filterByTimeRange = (items) => {
+    const range = parseInt(timeRange);
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth() - (range - 1), 1);
+    const end = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+    return items.filter(item => {
+      const date = new Date(item.date);
+      return date >= start && date <= end;
+    });
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -121,13 +133,17 @@ const Reports = () => {
       const incomes = incomesRes.data;
       const savingsTxns = savingsRes.data;
       setSavings(savingsTxns);
+      // Filter by time range for totals
+      const filteredIncomes = filterByTimeRange(incomes);
+      const filteredExpenses = filterByTimeRange(expenses);
+      const filteredSavings = filterByTimeRange(savingsTxns);
       // Calculate totals
-      const totalIncome = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
-      const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
-      const totalSavings = savingsTxns.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
+      const totalIncome = filteredIncomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
+      const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+      const totalSavings = filteredSavings.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
       const netBalance = totalIncome - totalExpenses - totalSavings;
 
-      // Process data for charts
+      // Process data for charts (use all data, as before)
       const months = getMonthsForTimeRange();
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
       const expenseBreakdown = processExpenseBreakdownData(expenses);
@@ -490,9 +506,9 @@ const Reports = () => {
             id="time-range"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            label="Last"
+            label="Time Range"
           >
-            <MenuItem value="1">Last month</MenuItem>
+            <MenuItem value="1">This month</MenuItem>
             <MenuItem value="3">Last 3 months</MenuItem>
             <MenuItem value="6">Last 6 months</MenuItem>
             <MenuItem value="12">Last year</MenuItem>
