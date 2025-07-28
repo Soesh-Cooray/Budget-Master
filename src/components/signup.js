@@ -54,6 +54,7 @@ function SignUpPage() {
                 first_name: name,
                 username: email,
                 password,
+                password2: confirmPassword, // Add this line
                 email: email,
             });
             console.log('Signup Response:', response);
@@ -64,7 +65,19 @@ function SignUpPage() {
             }, 3000);
         } catch (error) {
             if (error.response && error.response.data) {
-                setErrorMessage(JSON.stringify(error.response.data));
+                // Try to display a more readable error message
+                const data = error.response.data;
+                let message = '';
+                if (typeof data === 'string') {
+                    message = data;
+                } else if (typeof data === 'object') {
+                    message = Object.entries(data)
+                        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+                        .join('\n');
+                } else {
+                    message = 'Signup failed. Please try again.';
+                }
+                setErrorMessage(message);
             } else {
                 setErrorMessage('Signup failed. Please try again.');
             }
