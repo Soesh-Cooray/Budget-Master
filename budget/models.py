@@ -12,6 +12,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     transaction_type = models.CharField(max_length=10, choices=CATEGORY_TYPES, default='expense')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categories')
+    is_default = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
