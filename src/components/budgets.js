@@ -66,16 +66,14 @@ function BudgetsPage() {
 
     const handleAddNewBudget = async (newBudget) => {
         try {
-            const categoryObj = categories.find(cat => cat.name === newBudget.category);
-            if (!categoryObj) throw new Error('Category not found');
             const payload = {
-                category: categoryObj.id,
+                category_id: newBudget.category, // backend expects category_id
                 amount: newBudget.budgetAmount,
                 period: newBudget.period,
                 start_date: newBudget.startDate
             };
+            console.log("Budget payload:", payload);
             if (editingBudget) {
-                
                 const res = await budgetAPI.update(editingBudget.id, payload);
                 setBudgets(budgets.map(b => b.id === editingBudget.id ? res.data : b));
                 setSnackbar({
@@ -84,7 +82,6 @@ function BudgetsPage() {
                     severity: 'success'
                 });
             } else {
-                
                 const res = await budgetAPI.create(payload);
                 setBudgets([...budgets, res.data]);
                 setSnackbar({
@@ -127,7 +124,6 @@ function BudgetsPage() {
     // Helper to calculate spent for a budget
     const calculateSpent = (budget) => {
         const budgetStart = new Date(budget.start_date);
-        const now = new Date();
         let periodEnd;
         if (budget.period === 'monthly') {
             periodEnd = new Date(budgetStart.getFullYear(), budgetStart.getMonth() + 1, budgetStart.getDate());
@@ -139,13 +135,17 @@ function BudgetsPage() {
             periodEnd = new Date(budgetStart);
             periodEnd.setDate(periodEnd.getDate() + 1);
         }
-        // Only consider transactions in the period and category
+        // Only consider transactions in the period and category (robust category ID check)
         return transactions
-            .filter(txn =>
-                txn.category === budget.category &&
-                new Date(txn.date) >= budgetStart &&
-                new Date(txn.date) < periodEnd
-            )
+            .filter(txn => {
+                const txnCatId = typeof txn.category === 'object' ? txn.category.id : txn.category;
+                const budgetCatId = typeof budget.category === 'object' ? budget.category.id : budget.category;
+                return (
+                    txnCatId === budgetCatId &&
+                    new Date(txn.date) >= budgetStart &&
+                    new Date(txn.date) < periodEnd
+                );
+            })
             .reduce((sum, txn) => sum + parseFloat(txn.amount), 0);
     };
 
@@ -186,7 +186,10 @@ function BudgetsPage() {
                     const spent = calculateSpent(budget);
                     const remaining = Number(budget.amount) - spent;
                     const percent = Number(budget.amount) ? Math.min((spent / Number(budget.amount)) * 100, 100) : 0;
-                    const categoryName = categories.find(cat => cat.id === budget.category)?.name || 'Category';
+                    const categoryName =
+                        typeof budget.category === 'object'
+                            ? budget.category?.name
+                            : categories.find(cat => cat.id === budget.category)?.name || 'Category';
                     return (
                         <Grid item xs={12} sm={6} md={4} key={budget.id}>
                             <BudgetProgressCard
@@ -259,7 +262,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
 
     useEffect(() => {
         if (editingBudget) {
-            setCategory(categories.find(cat => cat.id === editingBudget.category)?.name || '');
+            setCategory(editingBudget.category || '');
             setBudgetAmount(Number(editingBudget.amount));
             setPeriod(editingBudget.period);
             setStartDate(editingBudget.start_date);
@@ -315,7 +318,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
             return;
         }
         onAddBudget({
-            category,
+            category, // now the ID
             budgetAmount,
             period,
             startDate,
@@ -352,7 +355,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
                                             <em>Select category</em>
                                         </MenuItem>
                                         {categories.map((cat) => (
-                                            <MenuItem key={cat.id} value={cat.name}>
+                                            <MenuItem key={cat.id} value={cat.id}>
                                                 {cat.name}
                                             </MenuItem>
                                         ))}
