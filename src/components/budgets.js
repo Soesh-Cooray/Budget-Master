@@ -262,7 +262,12 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
 
     useEffect(() => {
         if (editingBudget) {
-            setCategory(editingBudget.category || '');
+            // Ensure category is always an ID, not an object
+            setCategory(
+                typeof editingBudget.category === 'object'
+                    ? editingBudget.category?.id || ''
+                    : editingBudget.category || ''
+            );
             setBudgetAmount(Number(editingBudget.amount));
             setPeriod(editingBudget.period);
             setStartDate(editingBudget.start_date);
