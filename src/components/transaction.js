@@ -50,6 +50,7 @@ function TransactionsPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
+  const [sortAmountOrder, setSortAmountOrder] = useState(null); // null, 'asc', 'desc'
 
   // Fetch data on component mount
   useEffect(() => {
@@ -257,7 +258,10 @@ function TransactionsPage() {
     
     // Sort transactions by date in descending order (latest to oldest)
     transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
+    // Sort by amount if sortAmountOrder is set
+    if (sortAmountOrder) {
+      transactions.sort((a, b) => sortAmountOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount);
+    }
     return transactions;
   };
 
@@ -377,7 +381,12 @@ function TransactionsPage() {
               <TableCell sx={{ color: theme.palette.text.primary }}>Date</TableCell>
               <TableCell sx={{ color: theme.palette.text.primary }}>Category</TableCell>
               <TableCell sx={{ color: theme.palette.text.primary }}>Type</TableCell>
-              <TableCell sx={{ color: theme.palette.text.primary }}>Amount</TableCell>
+              <TableCell sx={{ color: theme.palette.text.primary, cursor: 'pointer', userSelect: 'none' }} onClick={() => setSortAmountOrder(sortAmountOrder === 'asc' ? 'desc' : 'asc')}>
+                Amount
+                <span style={{ marginLeft: 4, fontSize: 16 }}>
+                  {sortAmountOrder === 'asc' ? '▲' : sortAmountOrder === 'desc' ? '▼' : ''}
+                </span>
+              </TableCell>
               <TableCell sx={{ color: theme.palette.text.primary }}>Actions</TableCell>
             </TableRow>
           </TableHead>
