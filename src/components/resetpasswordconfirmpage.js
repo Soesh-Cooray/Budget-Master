@@ -48,7 +48,7 @@ function ResetPasswordConfirmPage() {
         }
 
         try {
-            // Get uid and token from URL parameters
+            
             const params = new URLSearchParams(location.search);
             const uid = params.get('uid');
             const token = params.get('token');
@@ -71,7 +71,7 @@ function ResetPasswordConfirmPage() {
             }, 2000);
         } catch (error) {
             if (error.response && error.response.data) {
-                // Handle specific error messages from the backend
+               
                 const errorMessage = Object.values(error.response.data)[0];
                 setMessage(`Error: ${errorMessage}`);
             } else {

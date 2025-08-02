@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Box, Card, TextField, Button, Typography, Link } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+
 
 function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
-    const navigate = useNavigate();
+    
 
     const handleResetRequest = async () => {
         try {
@@ -55,7 +55,7 @@ function ForgotPasswordPage() {
                 <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: 30 }}>Reset your password</Typography>
             </Box>
 
-            {/* Forgot Password Form */}
+          
             <Card sx={{ padding: 4, width: '350px', borderRadius: 4 }} elevation={5}>
                 {message && (
                     <Typography variant="body2" color={message.startsWith("Error") ? "error" : "success"} gutterBottom textAlign="center">

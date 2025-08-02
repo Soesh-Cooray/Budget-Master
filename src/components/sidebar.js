@@ -17,7 +17,7 @@ import { useTheme as useCustomTheme } from '../context/ThemeContext';
 
 const COLLAPSED_WIDTH = 69;
 
-// List of all ISO 4217 currencies (code, symbol, name)
+// List of all currencies 
 const currencyList = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
@@ -81,7 +81,7 @@ const currencyList = [
   { code: 'XOF', symbol: 'CFA', name: 'West African CFA franc' },
   { code: 'XAF', symbol: 'FCFA', name: 'Central African CFA franc' },
   { code: 'XPF', symbol: '₣', name: 'CFP franc' },
-  // ... (add more as needed)
+
 ];
 
 function Sidebar({ open, onClose }) {

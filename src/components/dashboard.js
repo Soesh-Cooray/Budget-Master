@@ -25,7 +25,6 @@ ChartJS.register(
   Legend
 );
 
-// Styled components
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: 12,
@@ -130,7 +129,6 @@ const Dashboard = () => {
   const [savings, setSavings] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
 
-  // Get username from JWT token
   let username = '';
   let firstName = '';
   const token = localStorage.getItem('accessToken');
@@ -152,7 +150,7 @@ const Dashboard = () => {
     if (hour < 18) return 'Good Afternoon';
     return 'Good Evening';
   };
-  // Handle date changes
+  
   const handleStartDateChange = (newValue) => {
     setStartDate(newValue);
     localStorage.setItem('dashboardStartDate', newValue.toISOString());
@@ -196,7 +194,7 @@ const Dashboard = () => {
       const totalIncome = incomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
       const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
       const totalSavings = savingsTxns.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
-      const currentBalance = totalIncome - totalExpenses - totalSavings;      // Process data for charts
+      const currentBalance = totalIncome - totalExpenses - totalSavings;     
       const monthsInRange = getMonthsInRange();
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, monthsInRange);
       const expenseBreakdown = processExpenseBreakdownData(expenses);
@@ -240,7 +238,7 @@ const Dashboard = () => {
     const incomeData = new Array(6).fill(0);
     const expenseData = new Array(6).fill(0);
 
-    // Process incomes
+    
     incomes.forEach(income => {
       const date = new Date(income.date);
       const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short' }));
@@ -249,7 +247,7 @@ const Dashboard = () => {
       }
     });
 
-    // Process expenses
+   
     expenses.forEach(expense => {
       const date = new Date(expense.date);
       const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short' }));
@@ -277,7 +275,6 @@ const Dashboard = () => {
       totalExpenses += amount;
     });
 
-    // Convert to arrays for chart
     const labels = Object.keys(categoryTotals);
     const values = Object.values(categoryTotals);
     const percentages = values.map(value => ((value / totalExpenses) * 100).toFixed(1));
@@ -357,7 +354,7 @@ const Dashboard = () => {
       periodEnd = new Date(budgetStart);
       periodEnd.setDate(periodEnd.getDate() + 1);
     }
-    // Only consider transactions in the period and category
+
     return transactions
       .filter(txn =>
         txn.category === budget.category &&
@@ -367,7 +364,7 @@ const Dashboard = () => {
       .reduce((sum, txn) => sum + parseFloat(txn.amount), 0);
   };
 
-  // Format date for API
+
   const formatDateForApi = (date) => {
     return format(date, 'yyyy-MM-dd');
   };
@@ -466,7 +463,7 @@ const Dashboard = () => {
               renderInput={(params) => <TextField {...params} fullWidth />}
             />
             <DatePicker
-              label="To Date"              value={endDate}
+              label="To Date" value={endDate}
               onChange={handleEndDateChange}
               renderInput={(params) => <TextField {...params} fullWidth />}
             />
@@ -633,7 +630,6 @@ const Dashboard = () => {
                 }} 
               />
             </Box>
-            {/* Legends for the doughnut chart - below the chart, inside the same Grid item */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 2, pb: 2 }}>
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center'}}>
                 {financialData.expenseBreakdown.labels.map((label, index) => (

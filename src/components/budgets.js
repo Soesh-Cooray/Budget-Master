@@ -67,7 +67,7 @@ function BudgetsPage() {
     const handleAddNewBudget = async (newBudget) => {
         try {
             const payload = {
-                category_id: newBudget.category, // backend expects category_id
+                category_id: newBudget.category,
                 amount: newBudget.budgetAmount,
                 period: newBudget.period,
                 start_date: newBudget.startDate
@@ -131,11 +131,9 @@ function BudgetsPage() {
             periodEnd = new Date(budgetStart);
             periodEnd.setDate(periodEnd.getDate() + 7);
         } else {
-            // 'once' or any other value
             periodEnd = new Date(budgetStart);
             periodEnd.setDate(periodEnd.getDate() + 1);
         }
-        // Only consider transactions in the period and category (robust category ID check)
         return transactions
             .filter(txn => {
                 const txnCatId = typeof txn.category === 'object' ? txn.category.id : txn.category;
@@ -309,7 +307,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
             setNewCategoryName('');
             setIsAddingCustomCategory(false);
             setNewCategoryType('expense');
-            onAddCustomCategory(); // Refresh categories
+            onAddCustomCategory(); 
             setError('');
         } catch (err) {
             console.error('Error creating category:', err);
@@ -323,7 +321,7 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
             return;
         }
         onAddBudget({
-            category, // now the ID
+            category,
             budgetAmount,
             period,
             startDate,

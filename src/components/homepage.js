@@ -33,7 +33,7 @@ function HomePage() {
         </Grid>
       </AppBar>
 
-      {/* Main Content */}
+  
       <Box sx={{ padding: 4 }}>
         <Grid container spacing={4}>
           <Grid item xs={12} md={6}>
@@ -79,7 +79,7 @@ function HomePage() {
         </Grid>
       </Box>
 
-      {/* Why Choose BudgetMaster Section */}
+
       <Box textAlign="center" padding={4} sx={{ overflow: 'visible' }}>
         <Typography variant="h4" sx={{ marginTop: 5, marginBottom: 7, fontWeight: 'bold' }}>
           Why Choose BudgetMaster

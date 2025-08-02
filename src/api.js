@@ -1,14 +1,14 @@
-// src/api.js
+
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/api/';  // Change this to match your Django server
+const API_URL = 'http://localhost:8000/api/';  
 
-// Create axios instance with auth token
+
 const apiClient = axios.create({
   baseURL: API_URL,
 });
 
-// Add interceptor to add auth token to requests
+
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
@@ -55,7 +55,7 @@ export const budgetAPI = {
   delete: (id) => apiClient.delete(`budgets/${id}/`),
 };
 
-// Comprehensive currency list (code, symbol, name)
+//  currency list
 export const currencyList = [
   { code: 'USD', symbol: '$', name: 'US Dollar' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
@@ -121,7 +121,7 @@ export const currencyList = [
   { code: 'XPF', symbol: '₣', name: 'CFP franc' },
 ];
 
-// Utility to get currency symbol
+
 export function getCurrencySymbol() {
   const currency = localStorage.getItem('currency') || 'USD';
   const found = currencyList.find(cur => cur.code === currency);

@@ -8,7 +8,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import { useNavigate } from 'react-router-dom';
-import { transactionAPI, categoryAPI, getCurrencySymbol } from '../api';  // Import the API functions
+import { transactionAPI, categoryAPI, getCurrencySymbol } from '../api';  
 
 const HoverMenuItem = styled(MenuItem)(({ theme }) => ({
   borderRadius: 5,
@@ -40,19 +40,19 @@ function TransactionsPage() {
     severity: 'success'
   });
 
-  // Form state
+
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); 
   const [category, setCategory] = useState('');
-  const [type, setType] = useState('expense'); // Default to expense
+  const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [currencySymbol, setCurrencySymbol] = useState(getCurrencySymbol());
-  const [sortAmountOrder, setSortAmountOrder] = useState(null); // null, 'asc', 'desc'
+  const [sortAmountOrder, setSortAmountOrder] = useState(null); 
 
-  // Fetch data on component mount
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -60,11 +60,11 @@ function TransactionsPage() {
   // Update available categories when type changes
   useEffect(() => {
     if (type === 'expense') {
-      setCategory(''); // Reset selected category
+      setCategory(''); 
     } else if (type === 'income') {
-      setCategory(''); // Reset selected category
+      setCategory(''); 
     } else if (type === 'savings') {
-      setCategory(''); // Reset selected category
+      setCategory(''); 
     }
   }, [type]);
 
@@ -89,7 +89,7 @@ function TransactionsPage() {
       setSavings(savingsRes.data);
       setAllCategories(categoriesRes.data);
       
-      // Separate categories by type
+      
       setExpenseCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'expense'));
       setIncomeCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'income'));
       setSavingsCategories(categoriesRes.data.filter(cat => cat.transaction_type === 'savings'));
@@ -114,7 +114,7 @@ function TransactionsPage() {
   };
 
   const handleOpenAddDialog = () => {
-    // Reset form when opening dialog
+    
     setDescription('');
     setAmount('');
     setDate(new Date().toISOString().split('T')[0]);
@@ -129,7 +129,7 @@ function TransactionsPage() {
   };
 
   const handleAddTransaction = async () => {
-    // Basic validation
+    
     if (!description || !amount || !date || !category) {
       setSnackbar({
         open: true,
@@ -138,7 +138,7 @@ function TransactionsPage() {
       });
       return;
     }
-    // Prevent future dates
+    
     if (new Date(date) > new Date()) {
       setSnackbar({
         open: true,
@@ -158,7 +158,7 @@ function TransactionsPage() {
       };
 
       if (editingTransaction) {
-        // Update existing transaction
+        
         await transactionAPI.update(editingTransaction.id, transactionData);
         setSnackbar({
           open: true,
@@ -166,7 +166,7 @@ function TransactionsPage() {
           severity: 'success'
         });
       } else {
-        // Create new transaction
+        
         await transactionAPI.create(transactionData);
         setSnackbar({
           open: true,
@@ -238,7 +238,7 @@ function TransactionsPage() {
   const filteredTransactions = () => {
     let transactions = [...expenses, ...incomes, ...savings];
     
-    // Apply search filter
+    
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       transactions = transactions.filter(t => 
@@ -246,19 +246,18 @@ function TransactionsPage() {
       );
     }
     
-    // Apply type filter
+    
     if (filterType !== 'all') {
       transactions = transactions.filter(t => t.transaction_type === filterType);
     }
     
-    // Apply category filter
+   
     if (filterCategory !== 'all') {
       transactions = transactions.filter(t => t.category === parseInt(filterCategory));
     }
     
-    // Sort transactions by date in descending order (latest to oldest)
+    
     transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-    // Sort by amount if sortAmountOrder is set
     if (sortAmountOrder) {
       transactions.sort((a, b) => sortAmountOrder === 'asc' ? a.amount - b.amount : b.amount - a.amount);
     }
@@ -430,7 +429,7 @@ function TransactionsPage() {
           </TableBody>
         </Table>
       ) : (
-        // Clean state when no transactions are available
+        
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="50vh">
           <MonetizationOnIcon sx={{ fontSize: 200, color: theme.palette.mode === 'dark' ? '#90caf9' : '#0EA9FF' }} />
           <Typography variant="h6" gutterBottom sx={{ color: theme.palette.text.primary }}>
@@ -457,7 +456,7 @@ function TransactionsPage() {
         </Box>
       )}
 
-      {/* Add/Edit Transaction Dialog */}
+   
       <Dialog
         open={openAddDialog}
         onClose={handleCloseAddDialog}
@@ -584,7 +583,7 @@ function TransactionsPage() {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+   
       <Dialog
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}

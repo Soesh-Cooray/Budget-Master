@@ -54,7 +54,7 @@ function SignUpPage() {
                 first_name: name,
                 username: email,
                 password,
-                password2: confirmPassword, // Add this line
+                password2: confirmPassword, 
                 email: email,
             });
             console.log('Signup Response:', response);
@@ -65,7 +65,7 @@ function SignUpPage() {
             }, 3000);
         } catch (error) {
             if (error.response && error.response.data) {
-                // Try to display a more readable error message
+                
                 const data = error.response.data;
                 let message = '';
                 if (typeof data === 'string') {
@@ -106,7 +106,7 @@ function SignUpPage() {
                 <Typography variant="subtitle1">Take control of your finances</Typography>
             </Box>
 
-            {/* Sign-up Form (Combined Card) */}
+            {/* Sign-up Form  */}
             <Card sx={{ padding: 4, width: '350px', borderRadius: 4, marginBottom:5 }} elevation={5}>
                 {successMessage && (
                     <Typography variant="body2" color="success" gutterBottom textAlign="center">

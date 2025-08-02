@@ -19,7 +19,7 @@ ChartJS.register(
   Legend
 );
 
-// Styled components
+
 const StyledCard = styled(Card)(({ theme }) => ({
   height: '100%',
   display: 'flex',
@@ -133,20 +133,24 @@ const Reports = () => {
       const incomes = incomesRes.data;
       const savingsTxns = savingsRes.data;
       setSavings(savingsTxns);
+
       // Filter by time range for totals
       const filteredIncomes = filterByTimeRange(incomes);
       const filteredExpenses = filterByTimeRange(expenses);
       const filteredSavings = filterByTimeRange(savingsTxns);
-      // Calculate totals
+      
+     
       const totalIncome = filteredIncomes.reduce((sum, income) => sum + parseFloat(income.amount), 0);
       const totalExpenses = filteredExpenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
       const totalSavings = filteredSavings.reduce((sum, saving) => sum + parseFloat(saving.amount), 0);
       const netBalance = totalIncome - totalExpenses - totalSavings;
 
-      // Process data for charts
+      
       const months = getMonthsForTimeRange();
       const incomeVsExpenses = processIncomeVsExpensesData(incomes, expenses, months);
-      // Use filtered data for breakdowns so charts reflect time range
+
+
+    
       const expenseBreakdown = processExpenseBreakdownData(filteredExpenses);
       const incomeBreakdown = processIncomeBreakdownData(filteredIncomes);
       const savingsBreakdown = processSavingsBreakdownData(filteredSavings);
@@ -188,7 +192,7 @@ const Reports = () => {
     const incomeData = new Array(months.length).fill(0);
     const expenseData = new Array(months.length).fill(0);
 
-    // Process incomes
+ 
     incomes.forEach(income => {
       const date = new Date(income.date);
       const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
@@ -197,7 +201,7 @@ const Reports = () => {
       }
     });
 
-    // Process expenses
+
     expenses.forEach(expense => {
       const date = new Date(expense.date);
       const monthIndex = months.indexOf(date.toLocaleString('default', { month: 'short', year: 'numeric' }));
@@ -225,7 +229,7 @@ const Reports = () => {
       totalExpenses += amount;
     });
 
-    // Convert to arrays for chart
+  
     const labels = Object.keys(categoryTotals);
     const values = Object.values(categoryTotals);
     const percentages = values.map(value => ((value / totalExpenses) * 100).toFixed(1));
@@ -301,25 +305,17 @@ const Reports = () => {
 
     // Calculate totals per source
     incomes.forEach(income => {
-      // Use income.category_name for grouping, fallback to 'Uncategorized'
+      
       const source = income.category_name || 'Uncategorized';
       const amount = parseFloat(income.amount);
       sourceTotals[source] = (sourceTotals[source] || 0) + amount;
       totalIncome += amount;
     });
 
-    // Convert to arrays for chart
+   
     const labels = Object.keys(sourceTotals);
     const values = Object.values(sourceTotals);
     const percentages = values.map(value => ((value / totalIncome) * 100).toFixed(1));
-
-    // Log the processed data for debugging
-    console.log('Income Breakdown Data:', {
-      labels,
-      values,
-      percentages,
-      totalIncome
-    });
 
     return {
       labels,
