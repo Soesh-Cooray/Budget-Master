@@ -11,11 +11,25 @@ function ForgotPasswordPage() {
 
     const handleResetRequest = async () => {
         try {
-            await axios.post('http://127.0.0.1:8000/auth/users/reset_password/', { email });
+            console.log("Sending password reset request for email:", email);
+            const response = await axios.post('http://127.0.0.1:8000/auth/users/reset_password/', 
+                { email },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                }
+            );
+            console.log("Password reset response:", response);
             setMessage("Password reset email sent. Please check your inbox.");
         } catch (error) {
-            setMessage("Error: Could not send reset email. Please try again.");
             console.error("Password reset request error:", error);
+            console.error("Error response:", error.response);
+            if (error.response && error.response.data) {
+                setMessage(`Error: ${error.response.data.join(', ')}`);
+            } else {
+                setMessage("Error: Could not send reset email. Please try again.");
+            }
         }
     };
 
