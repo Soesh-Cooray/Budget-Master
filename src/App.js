@@ -23,7 +23,7 @@ function App() {
         setOpen((prev) => !prev);
     };
     
-    // Add this to set the global box-sizing to border-box and enable scrolling
+    
     useEffect(() => {
         const style = document.createElement('style');
         style.innerHTML = `
@@ -95,7 +95,6 @@ function App() {
                         <Route path="/signup" element={<SignUpPage />} />
                         <Route path="/transaction" element={<TransactionsPage />} />
                         <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-                        {/* Update the reset password route to match Djoser's URL structure */}
                         <Route path="/reset-password-confirm" element={<ResetPasswordConfirmPage />} />
                         <Route path="/budgets" element={<BudgetsPage />} />
                         <Route path="/reports" element={<Reports />} />

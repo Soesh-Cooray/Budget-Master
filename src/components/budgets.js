@@ -320,6 +320,10 @@ function AddBudgetDialog({ open, onClose, onAddBudget, categories, onAddCustomCa
             setError('Please select a category');
             return;
         }
+        if (budgetAmount < 0) {
+            setError('Budget amount cannot be negative');
+            return;
+        }
         onAddBudget({
             category,
             budgetAmount,

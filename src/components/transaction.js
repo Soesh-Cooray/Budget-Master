@@ -129,7 +129,6 @@ function TransactionsPage() {
   };
 
   const handleAddTransaction = async () => {
-    
     if (!description || !amount || !date || !category) {
       setSnackbar({
         open: true,
@@ -138,7 +137,14 @@ function TransactionsPage() {
       });
       return;
     }
-    
+    if (parseFloat(amount) < 0) {
+      setSnackbar({
+        open: true,
+        message: 'Amount cannot be negative',
+        severity: 'error'
+      });
+      return;
+    }
     if (new Date(date) > new Date()) {
       setSnackbar({
         open: true,
@@ -147,7 +153,6 @@ function TransactionsPage() {
       });
       return;
     }
-
     try {
       const transactionData = {
         description,
@@ -156,9 +161,7 @@ function TransactionsPage() {
         category,
         transaction_type: type
       };
-
       if (editingTransaction) {
-        
         await transactionAPI.update(editingTransaction.id, transactionData);
         setSnackbar({
           open: true,
@@ -166,7 +169,6 @@ function TransactionsPage() {
           severity: 'success'
         });
       } else {
-        
         await transactionAPI.create(transactionData);
         setSnackbar({
           open: true,
@@ -174,8 +176,6 @@ function TransactionsPage() {
           severity: 'success'
         });
       }
-      
-      
       handleCloseAddDialog();
       fetchData();
     } catch (err) {
