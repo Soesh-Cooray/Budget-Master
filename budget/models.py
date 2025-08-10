@@ -1,9 +1,13 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+# Reference to the custom or default User model
 User = get_user_model()
 
+
+# Model representing a transaction category 
 class Category(models.Model):
+    # Types of categories
     CATEGORY_TYPES = [
         ('income', 'Income'),
         ('expense', 'Expense'),
@@ -17,6 +21,8 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
+# Model representing the budget for a specific category and period
 class Budget(models.Model):
     PERIOD_CHOICES = [
         ('monthly', 'Monthly'),
@@ -31,8 +37,11 @@ class Budget(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        # String representation for admin and shell
         return f"{self.category.name} - {self.amount}"
 
+
+# Model representing the financial transaction (income, expense, or savings)
 class Transaction(models.Model):
     TRANSACTION_TYPES = [
         ('income', 'Income'),

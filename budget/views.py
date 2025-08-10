@@ -5,6 +5,8 @@ from .serializers import BudgetSerializer, CategorySerializer, TransactionSerial
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
+
+# ViewSet for managing categories (expense, income, savings) for the authenticated user
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
@@ -15,6 +17,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+# Action to retrieve all expense,income and savings categories for the authenticated user
     @action(detail=False, methods=['get'])
     def expense_categories(self, request):
         qs = Category.objects.filter(user=request.user, transaction_type='expense')
@@ -33,6 +36,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer = CategorySerializer(qs, many=True)
         return Response(serializer.data)
 
+
+# ViewSet for managing budgets for the authenticated user
 class BudgetViewSet(viewsets.ModelViewSet):
     serializer_class = BudgetSerializer
     permission_classes = [IsAuthenticated]
@@ -43,6 +48,8 @@ class BudgetViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+
+# ViewSet for managing transactions (expenses, incomes, savings) for the authenticated user
 class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
@@ -53,6 +60,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+# Actions to retrieve transactions by type (expenses, incomes, savings) with date filtering
     @action(detail=False, methods=['get'])
     def expenses(self, request):
         start_date = request.query_params.get('start_date')

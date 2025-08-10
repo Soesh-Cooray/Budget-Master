@@ -20,7 +20,7 @@ class CustomPasswordResetEmail(PasswordResetEmail):
             context["uid"] = urlsafe_base64_encode(force_bytes(user.pk))
             context["token"] = default_token_generator.make_token(user)
             
-        # Get site information
+        
         try:
             site = get_current_site(self.request)
             context["site_name"] = site.name
@@ -71,7 +71,7 @@ class CustomPasswordChangedEmail(PasswordChangedConfirmationEmail):
     def get_context_data(self):
         context = super().get_context_data()
         
-        # Get site information
+        
         try:
             site = get_current_site(self.request)
             context["site_name"] = site.name

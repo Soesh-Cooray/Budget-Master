@@ -2,8 +2,11 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
+# Reference to the custom or default User model
 User = get_user_model()
 
+
+# Serializer for creating a new user, including password validation and confirmation
 class UserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)
@@ -20,7 +23,8 @@ class UserCreateSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         return attrs
-
+    
+    # Create a new user after removing password2 and using create_user for hashing.
     def create(self, validated_data):
         validated_data.pop('password2')
         user = User.objects.create_user(
