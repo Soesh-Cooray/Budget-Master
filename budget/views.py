@@ -3,11 +3,16 @@ from rest_framework.response import Response
 from .models import Budget, Category, Transaction
 from .serializers import BudgetSerializer, CategorySerializer, TransactionSerializer
 from rest_framework.permissions import IsAuthenticated
+
 from rest_framework.decorators import action
+from django.db import transaction
 
 
 # ViewSet for managing categories (expense, income, savings) for the authenticated user
 class CategoryViewSet(viewsets.ModelViewSet):
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            serializer.save(user=self.request.user)
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
 
@@ -15,7 +20,8 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Category.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        with transaction.atomic():
+            serializer.save(user=self.request.user)
 
 # Action to retrieve all expense,income and savings categories for the authenticated user
     @action(detail=False, methods=['get'])
@@ -39,6 +45,9 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 # ViewSet for managing budgets for the authenticated user
 class BudgetViewSet(viewsets.ModelViewSet):
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            serializer.save(user=self.request.user)
     serializer_class = BudgetSerializer
     permission_classes = [IsAuthenticated]
 
@@ -46,11 +55,15 @@ class BudgetViewSet(viewsets.ModelViewSet):
         return Budget.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        with transaction.atomic():
+            serializer.save(user=self.request.user)
 
 
 # ViewSet for managing transactions (expenses, incomes, savings) for the authenticated user
 class TransactionViewSet(viewsets.ModelViewSet):
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            serializer.save(user=self.request.user)
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -58,7 +71,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return Transaction.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        with transaction.atomic():
+            serializer.save(user=self.request.user)
 
 # Actions to retrieve transactions by type (expenses, incomes, savings) with date filtering
     @action(detail=False, methods=['get'])
