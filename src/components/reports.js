@@ -274,7 +274,7 @@ const Reports = () => {
         data: months.map((month) =>
           incomes
             .filter(i => (i.category_name || 'Uncategorized') === category &&
-                         new Date(i.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+              new Date(i.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
             .reduce((sum, i) => sum + parseFloat(i.amount), 0)
         ),
         backgroundColor: incomeColors[idx % incomeColors.length],
@@ -285,7 +285,7 @@ const Reports = () => {
         data: months.map((month) =>
           savings
             .filter(s => (s.category_name || 'Uncategorized') === category &&
-                         new Date(s.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
+              new Date(s.date).toLocaleString('default', { month: 'short', year: 'numeric' }) === month)
             .reduce((sum, s) => sum + parseFloat(s.amount), 0)
         ),
         backgroundColor: savingsColors[idx % savingsColors.length],
